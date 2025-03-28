@@ -1,0 +1,280 @@
+/*************************************************************************************/
+//
+
+// Description: 
+
+// Created: 
+
+// Author: 
+
+// Version: 
+
+// Vehicle Project: 
+
+//
+
+/*************************************************************************************/
+
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: CCU, 5 ms, 0.1 ms ;
+  Slaves: EXV, ICS;
+}
+Signals {
+  CCU_FrontAUTOIndicator: 1, 0, CCU, ICS ;   //前AUTO状态指示
+  CCU_A_Cindicator: 1, 0, CCU, ICS ;   //A/C状态指示
+  CCU_FrDefIndicator: 1, 0, CCU, ICS ;   //FrDef状态指示
+  TMM_EXV_PositionRequest: 16, 0, CCU, EXV ;   //EXV Position RequestEXV 设置开度请求
+  TMM_EXV_EnableRequest: 1, 0, CCU, EXV ;   //EXV Enable RequestEXV 使能请求
+  TMM_EXV_initRequest: 3, 0, CCU, EXV ;   //EXV Init RequestEXV 初始化请求
+  ICS_Fr_Panel_FrontAUTOSwich: 1, 0, ICS, CCU ;   //前AUTO按键信号
+  ICS_Fr_Panel_FrontFANSwich: 2, 0, ICS, CCU ;   //前FAN按键信号(风量加减按钮)
+  ICS_Fr_Panel_A_Cswich: 1, 0, ICS, CCU ;   //A/C按键信号
+  ICS_Fr_Panel_DefSwich: 1, 0, ICS, CCU ;   //Def按键信号
+  ICS_Fr_Panel_DriverTempDial: 2, 0, ICS, CCU ;   //驾驶员温度调节信号
+  ICS_ResponseError: 1, 0, ICS, CCU ;   //Response Error响应错误
+  EXV_ResponseError: 1, 0, EXV, CCU ;   //Response Error响应错误
+  EXV_CurrentInitState: 2, 0, EXV, CCU ;   //Current Init State当前初始化状态
+  EXV_RunState: 1, 0, EXV, CCU ;   //Run State当前运行状态
+  EXV_FaultState: 4, 0, EXV, CCU ;   //Fault State故障状态
+  EXV_VoltageState: 2, 0, EXV, CCU ;   //Voltage State电压状态
+  EXV_TemperatureWarn: 2, 0, EXV, CCU ;   //Temperature Warn温度警报
+  EXV_CurrentPosition: 16, 0, EXV, CCU ;   //EXV expansion valve opening: Current positionEXV膨胀阀开度:当前位置
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+Frames {
+  CCU_ACP_0x2A: 42, CCU, 8 {
+    CCU_FrontAUTOIndicator, 0 ;
+    CCU_A_Cindicator, 1 ;
+    CCU_FrDefIndicator, 13 ;
+  }
+  TMM_EXV3: 25, CCU, 8 {
+    TMM_EXV_PositionRequest, 0 ;
+    TMM_EXV_EnableRequest, 16 ;
+    TMM_EXV_initRequest, 24 ;
+  }
+  ICS_0x2C: 44, ICS, 8 {
+    ICS_Fr_Panel_FrontAUTOSwich, 0 ;
+    ICS_Fr_Panel_FrontFANSwich, 1 ;
+    ICS_Fr_Panel_A_Cswich, 3 ;
+    ICS_Fr_Panel_DefSwich, 4 ;
+    ICS_Fr_Panel_DriverTempDial, 5 ;
+    ICS_ResponseError, 7 ;
+  }
+  EXV_0x27: 39, EXV, 8 {
+    EXV_ResponseError, 0 ;
+    EXV_CurrentInitState, 2 ;
+    EXV_RunState, 4 ;
+    EXV_FaultState, 8 ;
+    EXV_VoltageState, 12 ;
+    EXV_TemperatureWarn, 14 ;
+    EXV_CurrentPosition, 16 ;
+  }
+}
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  EXV{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x5E ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = EXV_ResponseError ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      EXV_0x27; 
+      TMM_EXV3; 
+    }
+  }
+  ICS{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x5F ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = ICS_ResponseError ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      ICS_0x2C; 
+      CCU_ACP_0x2A; 
+    }
+  }
+}
+
+Schedule_tables {
+DIAG {
+  }
+RUN_MAIN {
+    CCU_ACP_0x2A delay 10 ms ;
+    TMM_EXV3 delay 10 ms ;
+    ICS_0x2C delay 10 ms ;
+    EXV_0x27 delay 10 ms ;
+  }
+}
+Signal_encoding_types {
+  CCU_FrontAUTOIndicator {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "Not active" ;
+    logical_value, 1, "Active" ;
+  }
+  CCU_A_Cindicator {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "Not active" ;
+    logical_value, 1, "Active" ;
+  }
+  CCU_FrDefIndicator {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "Not active" ;
+    logical_value, 1, "Active" ;
+  }
+  TMM_EXV_PositionRequest {
+    physical_value, 0, 480, 1, 0, "" ;
+  }
+  TMM_EXV_EnableRequest {
+    logical_value, 0, "EXVNotEnable" ;
+    logical_value, 1, "EXVEnable" ;
+  }
+  TMM_EXV_initRequest {
+    physical_value, 0, 2, 1, 0, "" ;
+    logical_value, 0, "NO_RQ" ;
+    logical_value, 1, "InitializationReq" ;
+    logical_value, 2, "Reserved" ;
+  }
+  ICS_Fr_Panel_FrontAUTOSwich {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "no operation" ;
+    logical_value, 1, "press the Auto button" ;
+  }
+  ICS_Fr_Panel_FrontFANSwich {
+    physical_value, 0, 2, 1, 0, "/" ;
+    logical_value, 0, "no operation" ;
+    logical_value, 1, "up" ;
+    logical_value, 2, "down" ;
+    logical_value, 3, "Reserved" ;
+  }
+  ICS_Fr_Panel_A_Cswich {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "no operation" ;
+    logical_value, 1, "press the A/C button" ;
+  }
+  ICS_Fr_Panel_DefSwich {
+    physical_value, 0, 1, 1, 0, "/" ;
+    logical_value, 0, "no operation" ;
+    logical_value, 1, "press the  Def button" ;
+  }
+  ICS_Fr_Panel_DriverTempDial {
+    physical_value, 0, 2, 1, 0, "/" ;
+    logical_value, 0, "no operation" ;
+    logical_value, 1, "up" ;
+    logical_value, 2, "down" ;
+    logical_value, 3, "Reserved" ;
+  }
+  ICS_ResponseError {
+    logical_value, 0, "No Comm Error 正常" ;
+    logical_value, 1, "Comm Error Active 执行错误" ;
+  }
+  EXV_ResponseError {
+    logical_value, 0, "No Comm Error 正常" ;
+    logical_value, 1, "Comm Error Active 执行错误" ;
+  }
+  EXV_CurrentInitState {
+    physical_value, 0, 2, 1, 0, "" ;
+    logical_value, 0, "NO_INIT 未初始化" ;
+    logical_value, 1, "INIT_IN_PROCESS 初始化中" ;
+    logical_value, 2, "Initialized 已初始化" ;
+  }
+  EXV_RunState {
+    logical_value, 0, "NO_MOVEMENT 未动作" ;
+    logical_value, 1, "ACT_MOVING 动作中" ;
+  }
+  EXV_FaultState {
+    physical_value, 0, 4, 1, 0, "" ;
+    logical_value, 0, "No Fault 正常" ;
+    logical_value, 1, "COIL_SHORT 线圈短路" ;
+    logical_value, 2, "COIL_OPEN 线圈开路" ;
+    logical_value, 3, "OVR_TMP_SHUTDOWN 超温关机" ;
+    logical_value, 4, "Stall Error 堵转" ;
+  }
+  EXV_VoltageState {
+    physical_value, 0, 2, 1, 0, "" ;
+    logical_value, 0, "Voltage Range OK 电压正常" ;
+    logical_value, 1, "Over Voltage 过压" ;
+    logical_value, 2, "Under Voltage 低压" ;
+  }
+  EXV_TemperatureWarn {
+    logical_value, 0, "OK 温度正常" ;
+    logical_value, 1, "WARNING 温度警报" ;
+  }
+  EXV_CurrentPosition {
+    physical_value, 0, 480, 1, 0, "" ;
+  }
+}
+Signal_representation {
+  CCU_FrontAUTOIndicator: CCU_FrontAUTOIndicator ;
+  CCU_A_Cindicator: CCU_A_Cindicator ;
+  CCU_FrDefIndicator: CCU_FrDefIndicator ;
+  TMM_EXV_PositionRequest: TMM_EXV_PositionRequest ;
+  TMM_EXV_EnableRequest: TMM_EXV_EnableRequest ;
+  TMM_EXV_initRequest: TMM_EXV_initRequest ;
+  ICS_Fr_Panel_FrontAUTOSwich: ICS_Fr_Panel_FrontAUTOSwich ;
+  ICS_Fr_Panel_FrontFANSwich: ICS_Fr_Panel_FrontFANSwich ;
+  ICS_Fr_Panel_A_Cswich: ICS_Fr_Panel_A_Cswich ;
+  ICS_Fr_Panel_DefSwich: ICS_Fr_Panel_DefSwich ;
+  ICS_Fr_Panel_DriverTempDial: ICS_Fr_Panel_DriverTempDial ;
+  ICS_ResponseError: ICS_ResponseError ;
+  EXV_ResponseError: EXV_ResponseError ;
+  EXV_CurrentInitState: EXV_CurrentInitState ;
+  EXV_RunState: EXV_RunState ;
+  EXV_FaultState: EXV_FaultState ;
+  EXV_VoltageState: EXV_VoltageState ;
+  EXV_TemperatureWarn: EXV_TemperatureWarn ;
+  EXV_CurrentPosition: EXV_CurrentPosition ;
+}

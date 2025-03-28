@@ -1,0 +1,305 @@
+/*************************************************************************************/
+//
+
+// Description: 
+
+// Created: 
+
+// Author: 
+
+// Version: 
+
+// Vehicle Project: 
+
+//
+
+/*************************************************************************************/
+
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: CCU, 5 ms, 0.1 ms ;
+  Slaves: EWPP, EWPB;
+}
+Signals {
+  TMS_EWPPSpeedSet: 8, 0, CCU, EWPP ;   //Pump Speed Request
+  EWP_P_RESP_ERROR: 1, 0, EWPP, CCU ;   //Pump Communication Error
+  EWP_P_OverTempWarn: 2, 0, EWPP, CCU ;   //Pump Over Temperature Fault
+  EWP_P_OverCurrWarn: 2, 0, EWPP, CCU ;   //Pump Over Current Fault
+  EWP_P_DryRunWarn: 2, 0, EWPP, CCU ;   //Pump Dry Run Fault
+  EWP_P_SupVoltWarn: 2, 0, EWPP, CCU ;   //Pump Over-voltage Fault
+  EWP_P_BlockWarn: 2, 0, EWPP, CCU ;   //Pump Stall Fault
+  EWP_P_Target_RPM: 8, 0, EWPP, CCU ;   //Pump Speed Request
+  EWP_P_ActuaRPM: 8, 0, EWPP, CCU ;
+  EWP_P_Volt: 8, 0, EWPP, CCU ;   //Pump Voltage
+  EWP_P_Temp: 8, 0, EWPP, CCU ;   //Pump PCB Temperature
+  EWP_P_Curr: 8, 0, EWPP, CCU ;   //Pump Current
+  TMS_EWPBSpeedSet: 8, 0, CCU, EWPB ;   //Pump Speed Request
+  EWP_B_RESP_ERROR: 1, 0, EWPB, CCU ;   //Pump Communication Error
+  EWP_B_OverTempWarn: 2, 0, EWPB, CCU ;   //Pump Over Temperature Fault
+  EWP_B_OverCurrWarn: 2, 0, EWPB, CCU ;   //Pump Over Current Fault
+  EWP_B_DryRunWarn: 2, 0, EWPB, CCU ;   //Pump Dry Run Fault
+  EWP_B_SupVoltWarn: 2, 0, EWPB, CCU ;   //Pump Over-voltage Fault
+  EWP_B_BlockWarn: 2, 0, EWPB, CCU ;   //Pump Stall Fault
+  EWP_B_Target_RPM: 8, 0, EWPB, CCU ;   //Pump Speed Request
+  EWP_B_ActuaRPM: 8, 0, EWPB, CCU ;
+  EWP_B_Volt: 8, 0, EWPB, CCU ;   //Pump Voltage
+  EWP_B_Temp: 8, 0, EWPB, CCU ;   //Pump PCB Temperature
+  EWP_B_Curr: 8, 0, EWPB, CCU ;   //Pump Current
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+Frames {
+  EWPP_Cmd: 27, CCU, 2 {
+    TMS_EWPPSpeedSet, 0 ;
+  }
+  EWPP_Rsp: 11, EWPP, 8 {
+    EWP_P_RESP_ERROR, 0 ;
+    EWP_P_OverTempWarn, 1 ;
+    EWP_P_OverCurrWarn, 3 ;
+    EWP_P_DryRunWarn, 5 ;
+    EWP_P_SupVoltWarn, 8 ;
+    EWP_P_BlockWarn, 10 ;
+    EWP_P_Target_RPM, 16 ;
+    EWP_P_ActuaRPM, 24 ;
+    EWP_P_Volt, 32 ;
+    EWP_P_Temp, 40 ;
+    EWP_P_Curr, 48 ;
+  }
+  EWPB_Cmd: 26, CCU, 2 {
+    TMS_EWPBSpeedSet, 0 ;
+  }
+  EWPB_Rsp: 10, EWPB, 8 {
+    EWP_B_RESP_ERROR, 0 ;
+    EWP_B_OverTempWarn, 1 ;
+    EWP_B_OverCurrWarn, 3 ;
+    EWP_B_DryRunWarn, 5 ;
+    EWP_B_SupVoltWarn, 8 ;
+    EWP_B_BlockWarn, 10 ;
+    EWP_B_Target_RPM, 16 ;
+    EWP_B_ActuaRPM, 24 ;
+    EWP_B_Volt, 32 ;
+    EWP_B_Temp, 40 ;
+    EWP_B_Curr, 48 ;
+  }
+}
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  EWPP{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x58 ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = EWP_P_RESP_ERROR ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      EWPP_Rsp; 
+      EWPP_Cmd; 
+    }
+  }
+  EWPB{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x5B ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = EWP_B_RESP_ERROR ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      EWPB_Rsp; 
+      EWPB_Cmd; 
+    }
+  }
+}
+
+Schedule_tables {
+DIAG {
+    MasterReq delay 10 ms ;
+    SlaveResp delay 10 ms ;
+  }
+RUN_MAIN {
+    EWPP_Cmd delay 10 ms ;
+    EWPP_Rsp delay 10 ms ;
+    EWPB_Cmd delay 10 ms ;
+    EWPB_Rsp delay 10 ms ;
+  }
+}
+Signal_encoding_types {
+  TMS_EWPPSpeedSet {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_P_RESP_ERROR {
+    logical_value, 0, "NO ERROR                               0x1:ERROR" ;
+  }
+  EWP_P_OverTempWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_P_OverCurrWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_P_DryRunWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_P_SupVoltWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_P_BlockWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_P_Target_RPM {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_P_ActuaRPM {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_P_Volt {
+    physical_value, 0, 255, 0.1, 0, "V" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_P_Temp {
+    physical_value, 0, 255, 1, -48, "¡æ" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_P_Curr {
+    physical_value, 0, 255, 0.1, 0, "A" ;
+    logical_value, 255, "Invalid" ;
+  }
+  TMS_EWPBSpeedSet {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_B_RESP_ERROR {
+    logical_value, 0, "NO ERROR                               0x1:ERROR" ;
+  }
+  EWP_B_OverTempWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_B_OverCurrWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_B_DryRunWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_B_SupVoltWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_B_BlockWarn {
+    physical_value, 0, 3, 1, 0, "" ;
+    logical_value, 0, "NO ERROR                               0x1:ERROR                                            0x2:SNA" ;
+    logical_value, 3, "Invalid" ;
+  }
+  EWP_B_Target_RPM {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_B_ActuaRPM {
+    physical_value, 0, 255, 0.4, 0, "%" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_B_Volt {
+    physical_value, 0, 255, 0.1, 0, "V" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_B_Temp {
+    physical_value, 0, 255, 1, -48, "¡æ" ;
+    logical_value, 255, "Invalid" ;
+  }
+  EWP_B_Curr {
+    physical_value, 0, 255, 0.1, 0, "A" ;
+    logical_value, 255, "Invalid" ;
+  }
+}
+Signal_representation {
+  TMS_EWPPSpeedSet: TMS_EWPPSpeedSet ;
+  EWP_P_RESP_ERROR: EWP_P_RESP_ERROR ;
+  EWP_P_OverTempWarn: EWP_P_OverTempWarn ;
+  EWP_P_OverCurrWarn: EWP_P_OverCurrWarn ;
+  EWP_P_DryRunWarn: EWP_P_DryRunWarn ;
+  EWP_P_SupVoltWarn: EWP_P_SupVoltWarn ;
+  EWP_P_BlockWarn: EWP_P_BlockWarn ;
+  EWP_P_Target_RPM: EWP_P_Target_RPM ;
+  EWP_P_ActuaRPM: EWP_P_ActuaRPM ;
+  EWP_P_Volt: EWP_P_Volt ;
+  EWP_P_Temp: EWP_P_Temp ;
+  EWP_P_Curr: EWP_P_Curr ;
+  TMS_EWPBSpeedSet: TMS_EWPBSpeedSet ;
+  EWP_B_RESP_ERROR: EWP_B_RESP_ERROR ;
+  EWP_B_OverTempWarn: EWP_B_OverTempWarn ;
+  EWP_B_OverCurrWarn: EWP_B_OverCurrWarn ;
+  EWP_B_DryRunWarn: EWP_B_DryRunWarn ;
+  EWP_B_SupVoltWarn: EWP_B_SupVoltWarn ;
+  EWP_B_BlockWarn: EWP_B_BlockWarn ;
+  EWP_B_Target_RPM: EWP_B_Target_RPM ;
+  EWP_B_ActuaRPM: EWP_B_ActuaRPM ;
+  EWP_B_Volt: EWP_B_Volt ;
+  EWP_B_Temp: EWP_B_Temp ;
+  EWP_B_Curr: EWP_B_Curr ;
+}
