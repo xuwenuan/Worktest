@@ -65,21 +65,16 @@ class Ui_MainWindow(object):
 
 # class InterfaceTest():
 
-class InterfaceTest(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None):
-        super(InterfaceTest, self).__init__(parent)
-        self.setupUi(self)
-
 
 class InterfaceTest(QMainWindow,Ui_MainWindow):
     config = CanLinConfig()
     elfAnalysis = ELFAnalysis()
     # elfAnalysis=None
-    InterfaceList=[]
-    hardwaredic={}
-    CANdic= {}
-    LINdic={}
-    interfacedic ={}
+    # InterfaceList=[]
+    # hardwaredic={}
+    # CANdic= {}
+    # LINdic={}
+    # interfacedic ={}
     logging.basicConfig(
             filename="log.log",
             filemode="w",
@@ -93,9 +88,13 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         self.setupUi(self)
         self.pushButton_2.clicked.connect(self.exceltoTable)
         self.settable()
-        # self.pushButton.clicked.connect(lambda :self.readMesseage(path1,path2,path3))
         self.pushButton3.clicked.connect(lambda :self.addrow(0))
-
+        self.elfAnalysis = ELFAnalysis()  # 实例变量
+        self.hardwaredic = {}
+        self.CANdic = {}
+        self.LINdic = {}
+        self.interfacedic = {}
+        self.InterfaceList = []
 
 
     #添加的复制粘贴模块
@@ -274,7 +273,7 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         # 显示成功消息
         messagebox.showinfo(state, message)
 
-    def readMesseage(self, path1):
+    def readMesseage(self, path1,path2):
         try:
             filename = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
             if filename[0]:
@@ -285,7 +284,7 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
                         data = self.tableWidget.item(i, j).text()
                         datalist.append(data)
                     self.InterfaceList.append(datalist)
-                # self.elfAnalysis.loadPath(path2)
+                #self.elfAnalysis.loadPath(path2)
                 if path1:
                     book1 = xlrd2.open_workbook(path1)
                     sheetbook1 = book1.sheet_by_name('软件接口定义表')
@@ -586,9 +585,9 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
 
 
 if __name__ == '__main__':
-    # path1 = r"C:\Users\pc\Downloads\自动化测试盒协议_BDM_KQC2_R.xlsx"
-    # path2 = r"C:\Users\pc\Downloads\CYT4BF_M7_Master.elf"
-    # path3= './接口测试.xlsx'
+    path1 = r"C:\Users\pc\Downloads\自动化测试盒协议_BDM_KQC2_R.xlsx"
+    path2 = r"C:\Users\pc\Downloads\CYT4BF_M7_Master.elf"
+    path3= './接口测试.xlsx'
     app =QApplication(sys.argv)
     # 初始化
     mainwindow = QMainWindow()

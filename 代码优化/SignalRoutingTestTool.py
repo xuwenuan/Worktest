@@ -266,13 +266,11 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
 
 
 
-
-
     def readMesseage(self,path2,path3,path4):
         try:
-            filename = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
-            if filename[0]:
-                path3 = filename[0]
+            # filename = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
+            # if filename[0]:
+            #     path3 = filename[0]
                 for i in range(0, self.tableWidget.rowCount()):
                     datalist = []
                     for j in range(0, self.tableWidget.columnCount() - 1):
@@ -517,7 +515,17 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
         if dataList!=[]:
             headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start', 'Length',
                             'flag', 'format']
-            workbook = Workbook(path3)
+            # workbook = Workbook(path3)
+            # 获取用户选择的文件路径
+            file_path1, _ = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
+
+            # 检查用户是否选择了有效的文件路径
+            if file_path1:
+                # 创建 Workbook 对象
+                workbook = Workbook(file_path1)
+            else:
+                logging.warning("用户未选择保存路径")
+
             sheet1 = workbook.add_worksheet('CAN')
             sheet1.set_column('C:D', 50)
             sheet1.set_column('B:B', 15)
@@ -536,7 +544,17 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
             headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start',
                             'Length',
                             'flag', 'format']
-            workbook = Workbook(path4)
+            # workbook = Workbook(path4)
+            # 获取用户选择的文件路径
+            file_path2, _ = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
+
+            # 检查用户是否选择了有效的文件路径
+            if file_path2:
+                # 创建 Workbook 对象
+                workbook = Workbook(file_path2)
+            else:
+                logging.warning("用户未选择保存路径")
+
             sheet1 = workbook.add_worksheet('CAN')
             sheet1.set_column('C:D', 50)
             sheet1.set_column('B:B', 15)
@@ -552,12 +570,22 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                 row = row + 1
             workbook.close()
 
+    def get_save_path(self, title, filter="Excel Files (*.xlsx)"):
+        path, _ = QFileDialog.getSaveFileName(None, title, "", filter)
+        if not path:
+            logging.warning("用户未选择路径")
+            return None
+        return path
+
+
 
 if __name__ == '__main__':
-    # path1= r"C:\Users\pc\Downloads\SinaRoutingTable.CSV"
-    # path2 = r"C:\Users\pc\Downloads\自动化测试盒协议_BDM_KQC2_R.xlsx"
+    path1= r"C:\Users\pc\Downloads\SinaRoutingTable.CSV"
+    path2 = r"C:\Users\pc\Downloads\自动化测试盒协议_BDM_KQC2_R.xlsx"
     # path3 = './信号路由自动测试.xlsx'
     # path4='./硬件测试.xlsx'
+
+
     app = QApplication(sys.argv)
     # 初始化
     mainwindow = QMainWindow()
