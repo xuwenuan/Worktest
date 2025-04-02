@@ -77,12 +77,13 @@ class Ui_MainWindow(object):
         self.menu.addAction(self.action_xlsx4)
         self.menubar.addAction(self.menu.menuAction())
 
+
         #在菜单中添加帮助菜单，对使用进行说明
         help_menu = self.menubar.addMenu("帮助")
         Reference_action = help_menu.addAction("参考文档")
-        Explan_action = help_menu.addAction("功能说明")
+        Explan_action = help_menu.addAction("步骤说明")
         Reference_action.triggered.connect(lambda: self.show_success_dialog(1, "参考文档"))
-        Explan_action.triggered.connect(lambda: self.show_success_dialog(2, "功能说明"))
+        Explan_action.triggered.connect(lambda: self.show_success_dialog(2, "步骤说明"))
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -103,3 +104,5 @@ class Ui_MainWindow(object):
         self.action_xlsx3.setText(_translate("MainWindow", "导入功能规范"))
         self.action_xlsx4.setText(_translate("MainWindow", "导出自动测试Excel"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "用例编写"))
+
+

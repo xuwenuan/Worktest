@@ -5,11 +5,11 @@ import logging
 import traceback
 import PyQt5
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor, QCursor, QPalette, QFont, QDesktopServices
 from PyQt5.QtWidgets import QAbstractItemView, QApplication, QMainWindow, QHeaderView, QFileDialog, QTableWidgetItem, \
     QPushButton, \
-    QCompleter, QMessageBox, QLineEdit, QMenu, QComboBox, QTableWidget, QAction
+    QCompleter, QMessageBox, QLineEdit, QMenu, QComboBox, QTableWidget, QAction, QProgressDialog
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils.units import points_to_pixels
 from win32comext.shell.demos.servers import context_menu
@@ -33,6 +33,26 @@ import atexit
 import threading
 import time
 from PyQt5.QtCore import QUrl
+
+class LoadELFThread(QThread):
+    finished = pyqtSignal(str)  # 成功信号，传递成功消息
+    error = pyqtSignal(str)     # 错误信号，传递错误消息
+
+    def __init__(self, elf_analysis, elf_path):
+        super().__init__()
+        self.elf_analysis = elf_analysis
+        self.elf_path = elf_path
+
+    def run(self):
+        try:
+            self.elf_analysis.loadPath(self.elf_path)
+            self.finished.emit(f"文件 '{self.elf_path}' 导入成功！")
+        except FileNotFoundError:
+            self.error.emit(f"文件 '{self.elf_path}' 不存在，请检查路径是否正确。")
+        except PermissionError:
+            self.error.emit(f"无法访问文件 '{self.elf_path}'，请检查文件权限。")
+        except Exception as e:
+            self.error.emit(f"文件导入失败：{str(e)}")
 
 
 class QComboboxEx(QComboBox):
@@ -79,6 +99,9 @@ class MainWindow(QMainWindow,Ui_MainWindow):
     getfile = GetFileData()
     elfAnalysis = ELFAnalysis()
     # InterfaceTest = InterfaceTest()
+
+    first_open_file_call = True
+
     logging.basicConfig(
         filename="log.log",
         filemode="w",
@@ -97,17 +120,12 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             self.pushButton.clicked.connect(self.genmessage)
             self.pushButton_4.clicked.connect(self.saveToexcel)
             self.pushButton_5.clicked.connect(lambda: self.addnote1(0))
-            # self.pushButton_6.clicked.connect(self.addSetting)
             self.action_xlsx2.triggered.connect(self.getELFAnalysis)
             self.pushButton_3.clicked.connect(self.clear_row)
             self.action_xlsx1.triggered.connect(self.excelTotable)
             self.action_xlsx4.triggered.connect(self.genAutoExcel)
-            # self.action_xlsx3.triggered.connect(self.getWordtitle)
             self.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
             self.tableWidget.customContextMenuRequested.connect(self.contextMenuEvent)
-            # self.tableWidget.setEditTriggers(self.tableWidge.NoEditTriggers)
-
-
 
             self.addwidget()
             thread = threading.Thread(target=self.save_file_periodically)
@@ -152,7 +170,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 current_time = time.time()
                 if current_time - last_save_time >= 120:
                     self.tableToexcel(filepath='./测试用例（自动保存）.xlsx')
-
         except:
             logging.error(traceback.format_exc() + "\n")
 
@@ -169,17 +186,67 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             msg_box = QMessageBox(QMessageBox.Information, "提示", "请输入正确的章节格式!")
             msg_box.exec_()
 
+    # def getELFAnalysis(self):
+    #     filter = "elf Files(*.elf);;out files (*.out)"
+    #     path = QFileDialog.getOpenFileName(self, "选择文件", '/', filter)
+    #     self.elfpath = path[0]
+    #     if self.elfpath:
+    #         # elfAnalysis = ELFAnalysis()
+    #         self.elfAnalysis.loadPath(self.elfpath)
+    #         # self.structDict = elfAnalysis.structDict
+    #         msg_box = QMessageBox(QMessageBox.Information, "标题", "导入成功!")
+    #         msg_box.exec_()
+
     def getELFAnalysis(self):
-        filter = "elf Files(*.elf);;out files (*.out)"
-        path = QFileDialog.getOpenFileName(self, "选择文件", '/', filter)
+        # 提取文件过滤器和默认路径为类属性，提高灵活性
+        file_filter = "elf Files(*.elf);;out files (*.out)"
+        default_path = self.last_open_path if hasattr(self, 'last_open_path') else '/'
+
+        # 打开文件选择对话框
+        path = QFileDialog.getOpenFileName(self, "选择文件", default_path, file_filter)
         self.elfpath = path[0]
-        if self.elfpath:
-            # elfAnalysis = ELFAnalysis()
-            self.elfAnalysis.loadPath(self.elfpath)
-            # self.structDict = elfAnalysis.structDict
-            msg_box = QMessageBox(QMessageBox.Information, "标题", "导入成功!")
+
+        # 如果用户取消选择，给出友好提示
+        if not self.elfpath:
+            msg_box = QMessageBox(QMessageBox.Warning, "提示", "未选择文件！")
+            msg_box.exec_()
+            return
+
+        # 记住上次打开的路径
+        self.last_open_path = os.path.dirname(self.elfpath)
+
+        try:
+            # 启动后台线程加载 ELF 文件
+            self.thread = LoadELFThread(self.elfAnalysis, self.elfpath)
+            self.thread.finished.connect(self.onLoadFinished)
+            self.thread.error.connect(self.onLoadError)
+            self.thread.start()
+
+            # 使用 QProgressDialog 显示加载中的提示信息
+            self.progress_dialog = QProgressDialog("正在加载文件，请稍候...", "取消", 0, 0, self)
+            self.progress_dialog.setWindowModality(Qt.WindowModal)
+            self.progress_dialog.setWindowTitle("加载中")
+            self.progress_dialog.show()
+
+            # 确保在加载完成后关闭进度对话框
+            self.thread.finished.connect(self.progress_dialog.close)
+            self.thread.error.connect(self.progress_dialog.close)
+
+        except Exception as e:
+            # 捕获异常并提示用户
+            logging.error(f"文件导入失败：{str(e)}")
+            error_title = "导入失败"
+            error_message = f"文件导入失败：{str(e)}"
+            msg_box = QMessageBox(QMessageBox.Critical, error_title, error_message)
             msg_box.exec_()
 
+    def onLoadFinished(self, message):
+        self.progress_dialog.close()
+        QMessageBox.information(self, "导入成功", message)
+
+    def onLoadError(self, message):
+        self.progress_dialog.close()
+        QMessageBox.critical(self, "导入失败", message)
 
 
 
@@ -284,31 +351,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     self.tableWidget.setItem(target_row, target_col, item)
 
         # 关闭窗口时保存文件提示
-
-    # def closeEvent(self, event):
-    #     reply = QtWidgets.QMessageBox.question(self, u'温馨提示', u'是否保存更改并退出?',
-    #                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
-    #
-    #     layout1 = InterfaceTest()
-    #     layout2 = RoutingTest()
-    #     layout3 = SignalRoutingTest()
-    #     if reply == QtWidgets.QMessageBox.Yes:
-    #         # 执行保存操作
-    #         if self.tabWidget.currentIndex() == 0:
-    #             self.saveToexcel()
-    #         elif self.tabWidget.currentIndex() == 1:
-    #             layout1.readMesseage(self.filename,self.elfpath)
-    #             # layout1.genautotable(self.filename)
-    #         elif self.tabWidget.currentIndex() == 2:
-    #             layout2.readMesseage(self.filename)
-    #         elif self.tabWidget.currentIndex() == 3:
-    #             layout3.readMesseage(self.filename, './信号路由自动测试.xlsx', './硬件输入的信号路由测试.xlsx')
-    #         event.accept()  # 关闭窗口
-    #     elif reply == QtWidgets.QMessageBox.No:
-    #         event.accept()  # 不保存直接关闭窗口
-    #     else:
-    #         event.ignore()  # 取消退出操作，保持窗口打开
-
     def closeEvent(self, event):
         # 弹出提示框询问用户是否保存更改并退出
         reply = QtWidgets.QMessageBox.question(
@@ -353,10 +395,12 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         if state == 1:
             QDesktopServices.openUrl(QUrl.fromLocalFile("./caseTool使用说明.pdf"))
         elif state == 2:
-            QDesktopServices.openUrl(Qt.fromLocalFile("./caseTool功能参考.pdf"))
+            QMessageBox.information(self, "重要提示！", "第一步导入协议文件，第二步导入map文件，第三步才是导入对应的测试文件。这样才能正确导出测试用例")
         else:
             # 处理其他情况
             pass
+
+
 
     def getTabelCellData(self, row, section):
         date = ""
@@ -1255,168 +1299,202 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             comboBox.currentTextChanged.connect(lambda: self.comboBoxChange(index, comboBox))
 
 
+
     def open_file(self):
         try:
+            # 检查是否是第一次调用
+            if self.first_open_file_call:
+                QMessageBox.information(self, "温馨提示！",
+                                        "导入协议文件后，别忘了导入map文件，最后才是导入对应的测试文件（仅第一次导入文件时提醒）")
+                self.first_open_file_call = False  # 设置标志变量为False，表示已经显示过了
+
             self.openfile = self.open_file or os.getcwd()
             fname = QFileDialog.getOpenFileName(self, "选择文件", '/', "xlsx Files(*.xlsx)")
             self.filename = fname[0]
-            if self.filename:
-                book = xlrd2.open_workbook(self.filename)
-                sheet = book.sheet_by_name('CAN用例解析矩阵')
-                datalist = []
-                for i in range(1,sheet.nrows):
-                    values = sheet.row_values(i)
-                    if values[25]!='':
-                        item = values[25].replace("：",':').replace('\r','').replace(';','').replace('；','')
-                        item = item.split('\n')
-                        signalname = values[8].replace('\n','').replace('\r','')
-                        item2 = [signalname] + item
-                        self.signalD1.append(item2)
-                        for j in range(len(item)):
-                            if ':' in item[j]:
-                                item[j] = item[j].split(":")[1]
-                            else:
-                                item.remove(item[j])
-                        item1=[signalname]+item
-                        self.signalD.append(item1)
-                    if values[8] != '' and values[0]!=''and values[1]=='':
-                        canN= values[0].replace('\r', '').replace('\n', '')
-                        signalN = values[8].replace('\r', '').replace('\n', '')
-                        data1=[canN,signalN,values[15],values[16],values[11],values[13],values[10]]
-                        datalist.append(signalN)
-                        self.diclist.append(data1)
-                datalist = list(set(datalist))
-                self.datalist=sorted(datalist,key=str.lower)
-                data1=[]
-                for k in range(sheet.nrows-1,0,-1):
-                    values = sheet.row_values(k)
-                    if values[5]==''and values[8]!='':
-                        data1.append(values[8].replace('\r', '').replace('\n', ''))
-                    elif values[5]!="":
-                        self.Canname = values[5]
-                        if data1 != [] and self.Canname != '':
-                            self.diclist1.append([self.Canname,values[3],values[2]]+data1)
-                            data1 = []
-                sheet5 = book.sheet_by_name('LIN用例解析矩阵')
-                linlist =[]
-                for i in range(1,sheet5.nrows):
-                    values = sheet5.row_values(i)
-                    if values[25]!='':
-                        item = values[25].replace("：",':').replace('\r','').replace(';','').replace('；','')
-                        item = item.split('\n')
-                        signalname = values[8].replace('\n', '').replace('\r', '')
-                        item2 = [signalname] + item
-                        self.linD1.append(item2)
-                        for j in range(len(item)):
-                            if ':' in item[j]:
-                                item[j] = item[j].split(":")[1]
-                            else:
-                                item.remove(item[j])
-                        item1=[signalname]+item
-                        self.linD.append(item1)
-                    if values[8] != '' and values[0]!=''and values[1]=='':
-                        linN= values[0].replace('\r', '').replace('\n', '')
-                        signalN = values[8].replace('\r', '').replace('\n', '')
-                        data1=[linN,signalN,values[15],values[16],values[11],values[13],values[10]]
-                        linlist.append(signalN)
-                        self.lindic.append(data1)
-                linlist = list(set(linlist))
-                self.linlist = sorted(linlist,key=str.lower)
-                data2 =[]
-                for k in range(sheet5.nrows-1,0,-1):
-                    values = sheet5.row_values(k)
-                    if values[6]==''and values[8]!='':
-                        data2.append(values[8].replace('\r', '').replace('\n', ''))
-                    elif values[6]!="":
-                        self.Linname = values[6]
-                        if data2 != [] and self.Linname != '':
-                            self.lindic1.append([self.Linname,values[3],values[2]]+data2)
-                            data2 = []
-                sheet2 = book.sheet_by_name('测试盒CAN通讯矩阵')
-                # 第二列名
-                self.candata = []
-                # 报文和参数
-                self.cansignal1 = []
-                #只有参数
-                self.cansignal = []
-                # 找偏移量等
-                self.candiclist=[]
-                # 逆向找对应id和报文周期时间
-                self.candiclist1 = []
-                candata1 = []
-                Vinput1 =[]
-                for m in range(sheet2.nrows - 1, 0, -1):
-                    values = sheet2.row_values(m)
-                    if values[5] == '' and values[8] != '':
-                        candata1.append(values[8].replace('\r', '').replace('\n', ''))
-                    elif values[5] != "":
-                        self.Canname = values[5]
-                        if candata1 != [] and self.Canname != '':
-                            self.candiclist1.append([values[0], self.Canname, values[3]] + candata1)
-                            candata1 = []
-                for n in range(1,sheet2.nrows):
-                    value = sheet2.row_values(n)
-                    if value[8] in self.candiclist1[0]:
-                        self.candata.append(value[8])
-                        canlist = value[25].replace('\r', '').split('\n')
-                        data = [value[8]]
-                        data2 = [value[8]]
-                        for l in canlist:
-                            if ":" in l and l!='':
-                                data.append(l)
-                                param = l.split(':')[1]
-                                data2.append(param)
-                        self.cansignal1.append(data)
-                        self.cansignal.append(data2)
-                        signalN = value[8].replace('\r', '').replace('\n', '')
-                        data1 = [signalN, value[10], value[11], value[13]]
-                        self.candiclist.append(data1)
-                self.candata= list(set(self.candata))
-                sheet6 = book.sheet_by_name('电阻模拟输出表')
-                for k in range(0,sheet6.ncols,2):
-                    dic={}
-                    temp =sheet6.col_values(k)[4:]
-                    ch =sheet6.col_values(k+1)[4:]
-                    for u in range(len(temp)):
-                        dic[temp[u]]=ch[u]
-                    self.RTlist.append(dic)
-                sheet3 = book.sheet_by_name('硬件配置表')
-                self.ID = sheet3.row_values(2)[4:12]
-                for l in range(2,12):
-                    lst= sheet3.col_values(l)
-                    result = list(filter(None, lst))
-                    if l == 2:
-                        self.CAN = result[2:]
-                    elif l==3:
-                        self.LIN= result[2:]
-                    elif l==9:
-                        self.openclose= result[2:-1]
-                    elif l==4:
-                        self.temp= result[2:-1]
-                    elif l==5:
-                        self.CV= result[2:-1]
-                    elif l==6:
-                        self.Vinput= result[2:-1]
-                    elif l==7:
-                        self.PWM= result[2:-1]
-                    elif l==10:
-                        self.outputPWM=result[2:-1]
-                    elif l==11:
-                        self.inputPWM=result[2:-1]
-                    elif l==8:
-                        self.banqiao=result[2:-1]
-                lst = sheet3.col_values(18)
-                result=list(filter(None,lst))
-                self.comboBoxList3=result[2:]
-                # print(self.ID)
-                sheet4 = book.sheet_by_name('软件接口定义表')
-                self.interfaceList = [s.replace('\n','').replace('\t','').strip() for s in sheet4.col_values(2)[1:]]
-                for k in range(1, sheet4.nrows):
-                    values = [str(s).replace('\n','').replace('\t','').strip() for s in sheet4.row_values(k)]
-                    self.interfaceDic.append(values)
-            # print(self.linlist,self.LIN)
-        except:
-            logging.error(traceback.format_exc() + "\n")
+
+            if not self.filename:
+                QMessageBox.warning(self, "提示", "未选择任何文件！")
+                return
+
+            book = xlrd2.open_workbook(self.filename)
+            required_sheets = [
+                'CAN用例解析矩阵',
+                'LIN用例解析矩阵',
+                '测试盒CAN通讯矩阵',
+                '电阻模拟输出表',
+                '硬件配置表',
+                '软件接口定义表'
+            ]
+
+            # 检查所有必需的工作表是否存在
+            missing_sheets = [sheet for sheet in required_sheets if sheet not in book.sheet_names()]
+            if missing_sheets:
+                error_message = f"文件 '{self.filename}' 缺少以下工作表: {', '.join(missing_sheets)}\n导入失败！"
+                logging.error(error_message)
+                QMessageBox.critical(self, "导入失败", error_message)
+                return
+
+            # 如果所有必需的工作表都存在，则继续处理
+            sheet = book.sheet_by_name('CAN用例解析矩阵')
+            datalist = []
+            for i in range(1, sheet.nrows):
+                values = sheet.row_values(i)
+                if values[25] != '':
+                    item = values[25].replace("：", ':').replace('\r', '').replace(';', '').replace('；', '')
+                    item = item.split('\n')
+                    signalname = values[8].replace('\n', '').replace('\r', '')
+                    item2 = [signalname] + item
+                    self.signalD1.append(item2)
+                    for j in range(len(item)):
+                        if ':' in item[j]:
+                            item[j] = item[j].split(":")[1]
+                        else:
+                            item.remove(item[j])
+                    item1 = [signalname] + item
+                    self.signalD.append(item1)
+                if values[8] != '' and values[0] != '' and values[1] == '':
+                    canN = values[0].replace('\r', '').replace('\n', '')
+                    signalN = values[8].replace('\r', '').replace('\n', '')
+                    data1 = [canN, signalN, values[15], values[16], values[11], values[13], values[10]]
+                    datalist.append(signalN)
+                    self.diclist.append(data1)
+            datalist = list(set(datalist))
+            self.datalist = sorted(datalist, key=str.lower)
+            data1 = []
+            for k in range(sheet.nrows - 1, 0, -1):
+                values = sheet.row_values(k)
+                if values[5] == '' and values[8] != '':
+                    data1.append(values[8].replace('\r', '').replace('\n', ''))
+                elif values[5] != "":
+                    self.Canname = values[5]
+                    if data1 != [] and self.Canname != '':
+                        self.diclist1.append([self.Canname, values[3], values[2]] + data1)
+                        data1 = []
+
+            sheet5 = book.sheet_by_name('LIN用例解析矩阵')
+            linlist = []
+            for i in range(1, sheet5.nrows):
+                values = sheet5.row_values(i)
+                if values[25] != '':
+                    item = values[25].replace("：", ':').replace('\r', '').replace(';', '').replace('；', '')
+                    item = item.split('\n')
+                    signalname = values[8].replace('\n', '').replace('\r', '')
+                    item2 = [signalname] + item
+                    self.linD1.append(item2)
+                    for j in range(len(item)):
+                        if ':' in item[j]:
+                            item[j] = item[j].split(":")[1]
+                        else:
+                            item.remove(item[j])
+                    item1 = [signalname] + item
+                    self.linD.append(item1)
+                if values[8] != '' and values[0] != '' and values[1] == '':
+                    linN = values[0].replace('\r', '').replace('\n', '')
+                    signalN = values[8].replace('\r', '').replace('\n', '')
+                    data1 = [linN, signalN, values[15], values[16], values[11], values[13], values[10]]
+                    linlist.append(signalN)
+                    self.lindic.append(data1)
+            linlist = list(set(linlist))
+            self.linlist = sorted(linlist, key=str.lower)
+            data2 = []
+            for k in range(sheet5.nrows - 1, 0, -1):
+                values = sheet5.row_values(k)
+                if values[6] == '' and values[8] != '':
+                    data2.append(values[8].replace('\r', '').replace('\n', ''))
+                elif values[6] != "":
+                    self.Linname = values[6]
+                    if data2 != [] and self.Linname != '':
+                        self.lindic1.append([self.Linname, values[3], values[2]] + data2)
+                        data2 = []
+
+            sheet2 = book.sheet_by_name('测试盒CAN通讯矩阵')
+            self.candata = []
+            self.cansignal1 = []
+            self.cansignal = []
+            self.candiclist = []
+            self.candiclist1 = []
+            candata1 = []
+            Vinput1 = []
+            for m in range(sheet2.nrows - 1, 0, -1):
+                values = sheet2.row_values(m)
+                if values[5] == '' and values[8] != '':
+                    candata1.append(values[8].replace('\r', '').replace('\n', ''))
+                elif values[5] != "":
+                    self.Canname = values[5]
+                    if candata1 != [] and self.Canname != '':
+                        self.candiclist1.append([values[0], self.Canname, values[3]] + candata1)
+                        candata1 = []
+            for n in range(1, sheet2.nrows):
+                value = sheet2.row_values(n)
+                if value[8] in self.candiclist1[0]:
+                    self.candata.append(value[8])
+                    canlist = value[25].replace('\r', '').split('\n')
+                    data = [value[8]]
+                    data2 = [value[8]]
+                    for l in canlist:
+                        if ":" in l and l != '':
+                            data.append(l)
+                            param = l.split(':')[1]
+                            data2.append(param)
+                    self.cansignal1.append(data)
+                    self.cansignal.append(data2)
+                    signalN = value[8].replace('\r', '').replace('\n', '')
+                    data1 = [signalN, value[10], value[11], value[13]]
+                    self.candiclist.append(data1)
+            self.candata = list(set(self.candata))
+
+            sheet6 = book.sheet_by_name('电阻模拟输出表')
+            for k in range(0, sheet6.ncols, 2):
+                dic = {}
+                temp = sheet6.col_values(k)[4:]
+                ch = sheet6.col_values(k + 1)[4:]
+                for u in range(len(temp)):
+                    dic[temp[u]] = ch[u]
+                self.RTlist.append(dic)
+
+            sheet3 = book.sheet_by_name('硬件配置表')
+            self.ID = sheet3.row_values(2)[4:12]
+            for l in range(2, 12):
+                lst = sheet3.col_values(l)
+                result = list(filter(None, lst))
+                if l == 2:
+                    self.CAN = result[2:]
+                elif l == 3:
+                    self.LIN = result[2:]
+                elif l == 9:
+                    self.openclose = result[2:-1]
+                elif l == 4:
+                    self.temp = result[2:-1]
+                elif l == 5:
+                    self.CV = result[2:-1]
+                elif l == 6:
+                    self.Vinput = result[2:-1]
+                elif l == 7:
+                    self.PWM = result[2:-1]
+                elif l == 10:
+                    self.outputPWM = result[2:-1]
+                elif l == 11:
+                    self.inputPWM = result[2:-1]
+                elif l == 8:
+                    self.banqiao = result[2:-1]
+            lst = sheet3.col_values(18)
+            result = list(filter(None, lst))
+            self.comboBoxList3 = result[2:]
+
+            sheet4 = book.sheet_by_name('软件接口定义表')
+            self.interfaceList = [s.replace('\n', '').replace('\t', '').strip() for s in sheet4.col_values(2)[1:]]
+            for k in range(1, sheet4.nrows):
+                values = [str(s).replace('\n', '').replace('\t', '').strip() for s in sheet4.row_values(k)]
+                self.interfaceDic.append(values)
+
+            # 成功导入后的提示框
+            QMessageBox.information(self, "导入成功", f"文件 '{self.filename}' 导入成功！")
+
+        except Exception as e:
+            logging.error(f"文件导入失败：{traceback.format_exc()}")
+            QMessageBox.critical(self, "导入失败", f"文件 '{self.filename}' 导入失败！\n错误详情：{str(e)}")
+
+
 
     def clear_row(self):
         try:
