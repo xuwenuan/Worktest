@@ -29,7 +29,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 4)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
@@ -38,6 +38,12 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.pushButton_2, 1, 0, 1, 1)
         self.pushButton3 = QtWidgets.QPushButton(self.centralwidget)
         self.gridLayout.addWidget(self.pushButton3, 1, 2, 1, 1)
+
+        # 清空数据按钮
+        self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_clear.setObjectName("pushButton_clear")
+        self.gridLayout.addWidget(self.pushButton_clear, 1, 3, 1, 1)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
@@ -57,9 +63,9 @@ class Ui_MainWindow(object):
         self.pushButton.setText(_translate("MainWindow", "导出文件"))
         self.pushButton_2.setText(_translate("MainWindow", "导入文件"))
         self.pushButton3.setText('添加行')
+        self.pushButton_clear.setText(_translate("MainWindow", "清空数据"))  # 设置按钮文本
 
 
-# class RoutingTest:
 class RoutingTest(QMainWindow,Ui_MainWindow):
     logging.basicConfig(
             filename="log.log",
@@ -85,6 +91,19 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
         self.settable()
         # self.pushButton.clicked.connect(lambda :self.readMesseage(path2,path3))
         self.pushButton3.clicked.connect(lambda: self.addrow(0))
+        self.pushButton_clear.clicked.connect(self.clear_table_data)  # 绑定清空数据按钮
+
+    def clear_table_data(self):
+        """
+        清空表格中的所有数据和行
+        """
+        try:
+            self.tableWidget.clearContents()  # 清空表格内容
+            self.tableWidget.setRowCount(0)  # 清空表格行数
+            self.settable()  # 重新设置表格头
+            QMessageBox.information(self, "提示", "数据已清空！")
+        except Exception as e:
+            logging.error(traceback.format_exc() + "\n")
 
     def exceltoTable(self):
         try:

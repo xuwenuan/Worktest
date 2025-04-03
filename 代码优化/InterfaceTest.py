@@ -34,7 +34,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 4)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
@@ -43,6 +43,12 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.pushButton_2, 1, 0, 1, 1)
         self.pushButton3 = QtWidgets.QPushButton(self.centralwidget)
         self.gridLayout.addWidget(self.pushButton3, 1, 2, 1, 1)
+
+        # 清空数据按钮
+        self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_clear.setObjectName("pushButton_clear")
+        self.gridLayout.addWidget(self.pushButton_clear, 1, 3, 1, 1)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
@@ -58,13 +64,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "空调测试用例编写工具"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "测试用例编写工具"))
         self.pushButton.setText(_translate("MainWindow", "导出文件"))
         self.pushButton_2.setText(_translate("MainWindow", "导入文件"))
         self.pushButton3.setText('添加行')
-
-# class InterfaceTest():
-
+        self.pushButton_clear.setText('清空数据')  # 设置清空按钮的文本
 
 class InterfaceTest(QMainWindow,Ui_MainWindow):
     config = CanLinConfig()
@@ -89,6 +93,9 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.exceltoTable)
         self.settable()
         self.pushButton3.clicked.connect(lambda :self.addrow(0))
+
+        self.pushButton_clear.clicked.connect(self.clear_table)
+
         self.elfAnalysis = ELFAnalysis()  # 实例变量
         self.hardwaredic = {}
         self.CANdic = {}
@@ -96,9 +103,21 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         self.interfacedic = {}
         self.InterfaceList = []
 
+    def clear_table(self):
+        """
+        清空 tableWidget 的所有行和内容
+        """
+        try:
+            # 清空表格中的所有行
+            self.tableWidget.setRowCount(0)
+            # 清空接口列表
+            self.InterfaceList.clear()
+            self.settable()  # 重新设置表格头
+            QMessageBox.information(self, "提示", "数据已清空！")
+        except Exception as e:
+            logging.error(f"清空表格时发生错误: {traceback.format_exc()}")
 
     #添加的复制粘贴模块
-
     def contextMenuEvent(self, event):
         try:
         # 创建右键菜单
@@ -128,7 +147,6 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
 
         except Exception as e:
             pass
-            # logging.error(f"Error in contextMenuEvent: {traceback.format_exc()}")
 
     def copy_selected_cells(self):
         """复制选中的单元格内容到剪贴板"""
@@ -160,14 +178,12 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
     # 将内容复制到剪贴板
         clipboard = QApplication.clipboard()
         clipboard.setText(clipboard_text.strip())
-        # logging.info(f"Copied text to clipboard: {clipboard_text.strip()}")
 
     def paste_cells(self):
         """将剪贴板内容粘贴到选中的单元格"""
         clipboard = QApplication.clipboard()
         clipboard_text = clipboard.text()
         if not clipboard_text:
-            # logging.info("No text in clipboard to paste.")
             return
 
     # 解析剪贴板内容为二维数组
@@ -177,7 +193,6 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
     # 获取目标起始位置
         selected_ranges = self.tableWidget.selectedRanges()
         if not selected_ranges:
-            # logging.info("No cells selected for pasting.")
             return
         start_row = selected_ranges[0].topRow()
         start_col = selected_ranges[0].leftColumn()
@@ -198,13 +213,9 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
                 widget = self.tableWidget.cellWidget(target_row, target_col)
                 if isinstance(widget, QComboBox):
                     widget.setCurrentText(cell_value)
-                    # logging.info(f"Pasted text '{cell_value}' to QComboBox at ({target_row}, {target_col})")
                 else:
                     item = QTableWidgetItem(cell_value)
                     self.tableWidget.setItem(target_row, target_col, item)
-                    # logging.info(f"Pasted text '{cell_value}' to QTableWidgetItem at ({target_row}, {target_col})")
-
-
 
 
     def exceltoTable(self):
