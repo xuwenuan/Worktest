@@ -31,7 +31,13 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 4)
+
+        # 添加清空按钮
+        self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_clear.setObjectName("pushButton_clear")
+        self.gridLayout.addWidget(self.pushButton_clear, 1, 3, 1, 1)
+
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
@@ -59,27 +65,41 @@ class Ui_MainWindow(object):
         self.pushButton.setText(_translate("MainWindow", "导出文件"))
         self.pushButton_2.setText(_translate("MainWindow", "导入文件"))
         self.pushButton3.setText('添加行')
-# class RoutingTest:
+        self.pushButton_clear.setText('清空数据')  # 设置清空按钮的文本
+
 
 class SignalRoutingTest(QMainWindow, Ui_MainWindow):
     config = CanLinConfig()
     logging.basicConfig(
-            filename="log.log",
-            filemode="w",
-            datefmt="%Y-%m-%d %H:%M:%S %p",
-            format="%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s",
-            level=logging.DEBUG
-        )
+        filename="log.log",
+        filemode="w",
+        datefmt="%Y-%m-%d %H:%M:%S %p",
+        format="%(asctime)s - %(name)s - %(levelname)s - %(module)s: %(message)s",
+        level=logging.DEBUG
+    )
     routingList = []
     CANList = []
-    banqiaoList=[]
-    def __init__(self, parent = None):
+    banqiaoList = []
+
+    def __init__(self, parent=None):
         super(SignalRoutingTest, self).__init__(parent)
         self.setupUi(self)
         self.pushButton_2.clicked.connect(self.exceltoTable)
+        self.pushButton_clear.clicked.connect(self.clear_table)  # 连接清空按钮的点击事件
         self.settable()
-        # self.pushButton.clicked.connect(lambda :self.readMesseage(path2,path3,path4))
         self.pushButton3.clicked.connect(lambda: self.addrow(0))
+
+    def clear_table(self):
+        """清空表格数据和 routingList"""
+        try:
+            self.tableWidget.setRowCount(0)  # 清空表格行
+            self.routingList.clear()  # 清空 routingList
+            self.settable()  # 重新设置表格头
+            QMessageBox.information(self, "提示", "数据已清空！")
+        except Exception as e:
+            logging.error(f"清空数据时出错: {traceback.format_exc()}")
+            QMessageBox.warning(self, "警告", f"清空数据时出错: {str(e)}")
+
 
     def exceltoTable(self):
         try:
@@ -187,7 +207,6 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
 
         except Exception as e:
             pass
-            # logging.error(f"Error in contextMenuEvent: {traceback.format_exc()}")
 
     def copy_selected_cells(self):
         """复制选中的单元格内容到剪贴板"""
@@ -219,14 +238,12 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
     # 将内容复制到剪贴板
         clipboard = QApplication.clipboard()
         clipboard.setText(clipboard_text.strip())
-        # logging.info(f"Copied text to clipboard: {clipboard_text.strip()}")
 
     def paste_cells(self):
         """将剪贴板内容粘贴到选中的单元格"""
         clipboard = QApplication.clipboard()
         clipboard_text = clipboard.text()
         if not clipboard_text:
-            # logging.info("No text in clipboard to paste.")
             return
 
     # 解析剪贴板内容为二维数组
@@ -236,7 +253,6 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
     # 获取目标起始位置
         selected_ranges = self.tableWidget.selectedRanges()
         if not selected_ranges:
-            # logging.info("No cells selected for pasting.")
             return
         start_row = selected_ranges[0].topRow()
         start_col = selected_ranges[0].leftColumn()
@@ -257,39 +273,30 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                 widget = self.tableWidget.cellWidget(target_row, target_col)
                 if isinstance(widget, QComboBox):
                     widget.setCurrentText(cell_value)
-                    # logging.info(f"Pasted text '{cell_value}' to QComboBox at ({target_row}, {target_col})")
                 else:
                     item = QTableWidgetItem(cell_value)
                     self.tableWidget.setItem(target_row, target_col, item)
-                    # logging.info(f"Pasted text '{cell_value}' to QTableWidgetItem at ({target_row}, {target_col})")
-
-
-
 
     def readMesseage(self,path2,path3,path4):
         try:
-            # filename = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
-            # if filename[0]:
-            #     path3 = filename[0]
-                for i in range(0, self.tableWidget.rowCount()):
-                    datalist = []
-                    for j in range(0, self.tableWidget.columnCount() - 1):
-                        data = self.tableWidget.item(i, j).text()
-                        datalist.append(data)
-                    self.routingList.append(datalist)
-                book2 = xlrd2.open_workbook(path2)
-                sheetbook2 = book2.sheet_by_name('硬件配置表')
-                self.LINList=sheetbook2.col_values(3)[3:]
-                self.CANList = sheetbook2.col_values(2)[3:]
-                self.banqiaoList = sheetbook2.col_values(8)[3:]
-                self.genautotable(path3,path4)
-                self.show_success_dialog('Success', '生成成功！')
+            for i in range(0, self.tableWidget.rowCount()):
+                datalist = []
+                for j in range(0, self.tableWidget.columnCount() - 1):
+                    data = self.tableWidget.item(i, j).text()
+                    datalist.append(data)
+                self.routingList.append(datalist)
+            book2 = xlrd2.open_workbook(path2)
+            sheetbook2 = book2.sheet_by_name('硬件配置表')
+            self.LINList=sheetbook2.col_values(3)[3:]
+            self.CANList = sheetbook2.col_values(2)[3:]
+            self.banqiaoList = sheetbook2.col_values(8)[3:]
+            self.genautotable(path3,path4)
+            self.show_success_dialog('Success', '生成成功！')
         except:
-                self.show_success_dialog('FAIL', '生成失败，查看log！')
-                logging.error(traceback.format_exc() + "\n")
+            self.show_success_dialog('FAIL', '生成失败，查看log！')
+            logging.error(traceback.format_exc() + "\n")
 
     def genautotable(self,path3,path4):
-        # self.routingList = self.routingList[1:]
         dataList=[]
         dataListhard = []
         for item in self.routingList:
@@ -333,7 +340,7 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                     # data3 = '0014'
                     cycle = '20'
                 else:
-                    # data3 = str(hex(int(item[5]))).upper()[2:].zfill(4)
+
                     cycle = item[5]
                 if int(item[2])==2:
                     name = item[1] + "_" + item[0]
@@ -512,20 +519,30 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                 note = ['测试用例说明', text, '10', '', '', '', '', '', '', '']
                 dataListhard.append(note)
         # print(dataList)
+
+        # 检查数据是否为空
+        has_dataList = bool(dataList)
+        has_dataListhard = bool(dataListhard)
+
+        if not has_dataList and not has_dataListhard:
+            QMessageBox.warning(self, "警告", "没有可保存的数据！")
+            return
+
+        # 弹窗提醒用户需要保存的文件数量
+        if has_dataList and has_dataListhard:
+            QMessageBox.information(self, "提示", "需要保存两个文件：信号路由自动测试和硬件测试。")
+        elif has_dataList:
+            QMessageBox.information(self, "提示", "需要保存一个文件：信号路由自动测试。")
+        else:
+            QMessageBox.information(self, "提示", "需要保存一个文件：硬件测试。")
+
         if dataList!=[]:
             headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start', 'Length',
                             'flag', 'format']
             # workbook = Workbook(path3)
             # 获取用户选择的文件路径
-            file_path1, _ = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
-
-            # 检查用户是否选择了有效的文件路径
-            if file_path1:
-                # 创建 Workbook 对象
-                workbook = Workbook(file_path1)
-            else:
-                logging.warning("用户未选择保存路径")
-
+            file_path1, _ = QFileDialog.getSaveFileName(self, '导出信号路由自动测试', '', 'Excel File(*.xlsx)')
+            workbook = Workbook(file_path1)
             sheet1 = workbook.add_worksheet('CAN')
             sheet1.set_column('C:D', 50)
             sheet1.set_column('B:B', 15)
@@ -540,21 +557,16 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                     sheet1.write(row, j+1, dataList[l][j], font)
                 row = row+1
             workbook.close()
+            dataList.clear()
+
         if dataListhard!=[]:
             headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start',
                             'Length',
                             'flag', 'format']
             # workbook = Workbook(path4)
             # 获取用户选择的文件路径
-            file_path2, _ = QFileDialog.getSaveFileName(self, '导出测试用例', '', 'Excel File(*.xlsx)')
-
-            # 检查用户是否选择了有效的文件路径
-            if file_path2:
-                # 创建 Workbook 对象
-                workbook = Workbook(file_path2)
-            else:
-                logging.warning("用户未选择保存路径")
-
+            file_path2, _ = QFileDialog.getSaveFileName(self, '导出硬件测试', '', 'Excel File(*.xlsx)')
+            workbook = Workbook(file_path2)
             sheet1 = workbook.add_worksheet('CAN')
             sheet1.set_column('C:D', 50)
             sheet1.set_column('B:B', 15)
@@ -569,13 +581,7 @@ class SignalRoutingTest(QMainWindow, Ui_MainWindow):
                     sheet1.write(row, j + 1, dataListhard[l][j], font)
                 row = row + 1
             workbook.close()
-
-    def get_save_path(self, title, filter="Excel Files (*.xlsx)"):
-        path, _ = QFileDialog.getSaveFileName(None, title, "", filter)
-        if not path:
-            logging.warning("用户未选择路径")
-            return None
-        return path
+            dataListhard.clear()
 
 
 
@@ -585,7 +591,6 @@ if __name__ == '__main__':
     # path3 = './信号路由自动测试.xlsx'
     # path4='./硬件测试.xlsx'
 
-
     app = QApplication(sys.argv)
     # 初始化
     mainwindow = QMainWindow()
@@ -594,8 +599,7 @@ if __name__ == '__main__':
     aa = SignalRoutingTest()
     aa.show()
     sys.exit(app.exec_())
-    # aa = RoutingTest()
-    # aa.readMesseage()
+
 
 
 
