@@ -34,6 +34,26 @@ import threading
 import time
 from PyQt5.QtCore import QUrl
 
+# class LoadELFThread(QThread):
+#     finished = pyqtSignal(str)  # 成功信号，传递成功消息
+#     error = pyqtSignal(str)     # 错误信号，传递错误消息
+#
+#     def __init__(self, elf_analysis, elf_path):
+#         super().__init__()
+#         self.elf_analysis = elf_analysis
+#         self.elf_path = elf_path
+#
+#     def run(self):
+#         try:
+#             self.elf_analysis.loadPath(self.elf_path)
+#             self.finished.emit(f"文件 '{self.elf_path}' 导入成功！")
+#         except FileNotFoundError:
+#             self.error.emit(f"文件 '{self.elf_path}' 不存在，请检查路径是否正确。")
+#         except PermissionError:
+#             self.error.emit(f"无法访问文件 '{self.elf_path}'，请检查文件权限。")
+#         except Exception as e:
+#             self.error.emit(f"文件导入失败：{str(e)}")
+
 class LoadELFThread(QThread):
     finished = pyqtSignal(str)  # 成功信号，传递成功消息
     error = pyqtSignal(str)     # 错误信号，传递错误消息
@@ -45,6 +65,13 @@ class LoadELFThread(QThread):
 
     def run(self):
         try:
+            # 模拟加载文件的过程，这里使用一个循环来模拟长时间操作
+            for i in range(100):
+                if self.isInterruptionRequested():
+                    self.error.emit(f"文件加载被取消")
+                    return
+                time.sleep(0.1)  # 模拟加载时间
+
             self.elf_analysis.loadPath(self.elf_path)
             self.finished.emit(f"文件 '{self.elf_path}' 导入成功！")
         except FileNotFoundError:
@@ -53,6 +80,7 @@ class LoadELFThread(QThread):
             self.error.emit(f"无法访问文件 '{self.elf_path}'，请检查文件权限。")
         except Exception as e:
             self.error.emit(f"文件导入失败：{str(e)}")
+
 
 
 class QComboboxEx(QComboBox):
@@ -228,6 +256,9 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             self.progress_dialog.setWindowTitle("加载中")
             self.progress_dialog.show()
 
+            # 连接取消按钮到终止线程的槽函数
+            self.progress_dialog.canceled.connect(self.thread.requestInterruption)
+
             # 确保在加载完成后关闭进度对话框
             self.thread.finished.connect(self.progress_dialog.close)
             self.thread.error.connect(self.progress_dialog.close)
@@ -363,6 +394,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 # 根据当前选项卡执行对应的保存操作
                 current_tab_index = self.tabWidget.currentIndex()
                 current_widget = self.tabWidget.currentWidget()
+                layout3 = SignalRoutingTest()
 
                 if current_tab_index == 0:
                     self.saveToexcel()
