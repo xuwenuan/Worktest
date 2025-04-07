@@ -34,25 +34,6 @@ import threading
 import time
 from PyQt5.QtCore import QUrl
 
-# class LoadELFThread(QThread):
-#     finished = pyqtSignal(str)  # 成功信号，传递成功消息
-#     error = pyqtSignal(str)     # 错误信号，传递错误消息
-#
-#     def __init__(self, elf_analysis, elf_path):
-#         super().__init__()
-#         self.elf_analysis = elf_analysis
-#         self.elf_path = elf_path
-#
-#     def run(self):
-#         try:
-#             self.elf_analysis.loadPath(self.elf_path)
-#             self.finished.emit(f"文件 '{self.elf_path}' 导入成功！")
-#         except FileNotFoundError:
-#             self.error.emit(f"文件 '{self.elf_path}' 不存在，请检查路径是否正确。")
-#         except PermissionError:
-#             self.error.emit(f"无法访问文件 '{self.elf_path}'，请检查文件权限。")
-#         except Exception as e:
-#             self.error.emit(f"文件导入失败：{str(e)}")
 
 class LoadELFThread(QThread):
     finished = pyqtSignal(str)  # 成功信号，传递成功消息
@@ -68,7 +49,7 @@ class LoadELFThread(QThread):
             # 模拟加载文件的过程，这里使用一个循环来模拟长时间操作
             for i in range(100):
                 if self.isInterruptionRequested():
-                    self.error.emit(f"文件加载被取消")
+                    self.error.emit(f"MAP文件加载被取消")
                     return
                 time.sleep(0.1)  # 模拟加载时间
 
@@ -185,46 +166,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.tabWidget.addTab(layout3, '信号路由测试')
         self.tabWidget.setCurrentIndex(0)
 
-
-    # 保存文件的函数
-    def save_file_periodically(self):
-        try:
-        # 初始化上次保存时间
-            last_save_time = time.time()
-            while True:
-                # 等待一秒钟
-                time.sleep(60)
-                # 检查是否到了保存时间点
-                current_time = time.time()
-                if current_time - last_save_time >= 120:
-                    self.tableToexcel(filepath='./测试用例（自动保存）.xlsx')
-        except:
-            logging.error(traceback.format_exc() + "\n")
-
-
-
-    def insertChapter(self):
-        self.win.setwin()
-        if self.win.newchapter.startswith('Level 1:'):
-            self.chapterList.append(self.win.newchapter)
-            self.chapterList=sorted(self.chapterList, key=str.lower)
-            self.datatotable()
-            # self.tableWidget.verticalScrollBar().setSliderPosition(0)
-        elif self.win.newchapter !='':
-            msg_box = QMessageBox(QMessageBox.Information, "提示", "请输入正确的章节格式!")
-            msg_box.exec_()
-
-    # def getELFAnalysis(self):
-    #     filter = "elf Files(*.elf);;out files (*.out)"
-    #     path = QFileDialog.getOpenFileName(self, "选择文件", '/', filter)
-    #     self.elfpath = path[0]
-    #     if self.elfpath:
-    #         # elfAnalysis = ELFAnalysis()
-    #         self.elfAnalysis.loadPath(self.elfpath)
-    #         # self.structDict = elfAnalysis.structDict
-    #         msg_box = QMessageBox(QMessageBox.Information, "标题", "导入成功!")
-    #         msg_box.exec_()
-
     def getELFAnalysis(self):
         # 提取文件过滤器和默认路径为类属性，提高灵活性
         file_filter = "elf Files(*.elf);;out files (*.out)"
@@ -279,20 +220,17 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         self.progress_dialog.close()
         QMessageBox.critical(self, "导入失败", message)
 
-
-
-
     def contextMenuEvent(self, event):
         try:
-        # 创建右键菜单
+            # 创建右键菜单
             menu = QMenu(self)
             row = self.tableWidget.rowAt(event.y())
 
-        # 添加菜单项：插入步骤、插入备注
+            # 添加菜单项：插入步骤、插入备注
             insert_row_action = menu.addAction('插入步骤')
             note_row_action = menu.addAction('插入备注')
 
-        # 添加复制和粘贴功能
+            # 添加复制和粘贴功能
             copy_action = QAction("复制 (Ctrl+C)", self)
             paste_action = QAction("粘贴 (Ctrl+V)", self)
 
@@ -302,16 +240,15 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             menu.addAction(copy_action)
             menu.addAction(paste_action)
 
-        # 绑定菜单项触发事件
+            # 绑定菜单项触发事件
             insert_row_action.triggered.connect(lambda: self.addrow1(row + 1))
             note_row_action.triggered.connect(lambda: self.addnote1(row + 1))
 
-        # 显示菜单
+            # 显示菜单
             menu.exec_(QCursor.pos())
 
         except Exception as e:
             pass
-
 
     def copy_selected_cells(self):
         """复制选中的单元格内容到剪贴板"""
@@ -324,7 +261,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             top_row, bottom_row = selected_range.topRow(), selected_range.bottomRow()
             left_col, right_col = selected_range.leftColumn(), selected_range.rightColumn()
 
-        # 构造复制内容
+            # 构造复制内容
             for row in range(top_row, bottom_row + 1):
                 row_data = []
                 for col in range(left_col, right_col + 1):
@@ -339,7 +276,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                             row_data.append("")
                 clipboard_text += "\t".join(row_data) + "\n"
 
-    # 将内容复制到剪贴板
+        # 将内容复制到剪贴板
         clipboard = QApplication.clipboard()
         clipboard.setText(clipboard_text.strip())
 
@@ -350,30 +287,30 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         if not clipboard_text:
             return
 
-    # 解析剪贴板内容为二维数组
+        # 解析剪贴板内容为二维数组
         rows = clipboard_text.split("\n")
         data = [row.split("\t") for row in rows]
 
-    # 获取目标起始位置
+        # 获取目标起始位置
         selected_ranges = self.tableWidget.selectedRanges()
         if not selected_ranges:
             return
         start_row = selected_ranges[0].topRow()
         start_col = selected_ranges[0].leftColumn()
 
-    # 填充表格
+        # 填充表格
         for i, row_data in enumerate(data):
             for j, cell_value in enumerate(row_data):
                 target_row = start_row + i
                 target_col = start_col + j
 
-            # 动态扩展表格
+                # 动态扩展表格
                 if target_row >= self.tableWidget.rowCount():
                     self.tableWidget.insertRow(target_row)
                 if target_col >= self.tableWidget.columnCount():
                     self.tableWidget.insertColumn(target_col)
 
-            # 设置单元格内容
+                # 设置单元格内容
                 widget = self.tableWidget.cellWidget(target_row, target_col)
                 if isinstance(widget, QComboBox):
                     widget.setCurrentText(cell_value)
@@ -382,6 +319,7 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                     self.tableWidget.setItem(target_row, target_col, item)
 
         # 关闭窗口时保存文件提示
+
     def closeEvent(self, event):
         # 弹出提示框询问用户是否保存更改并退出
         reply = QtWidgets.QMessageBox.question(
@@ -403,7 +341,8 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 elif current_tab_index == 2:
                     current_widget.readMesseage(self.filename)
                 elif current_tab_index == 3:
-                    current_widget.readMesseage(self.filename, './信号路由自动测试.xlsx', './硬件输入的信号路由测试.xlsx')
+                    current_widget.readMesseage(self.filename, './信号路由自动测试.xlsx',
+                                                './硬件输入的信号路由测试.xlsx')
 
                 event.accept()  # 关闭窗口
             except Exception as e:
@@ -415,23 +354,63 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         else:
             event.ignore()  # 取消退出操作，保持窗口打开
 
-
         # 这是一个测试信息提示函数
+
     def show_test_message(self):
         msg_test = QMessageBox(QMessageBox.Information, "提示", "这是一条测试信息")
         msg_test.exec_()
 
+        # 这是添加菜单栏的帮助窗口
 
-    #这是添加菜单栏的帮助窗口
     def show_success_dialog(self, state, message):
         if state == 1:
-            QDesktopServices.openUrl(QUrl.fromLocalFile("./caseTool使用说明.pdf"))
+            QDesktopServices.openUrl(QUrl.fromLocalFile("./参考文档.pdf"))
         elif state == 2:
-            QMessageBox.information(self, "重要提示！", "第一步导入协议文件，第二步导入map文件，第三步才是导入对应的测试文件。这样才能正确导出测试用例")
+            QMessageBox.information(self, "重要提示！",
+                                    "第一步导入协议文件，第二步导入map文件，第三步才是导入对应的测试文件。这样才能正确导出测试用例")
         else:
             # 处理其他情况
             pass
 
+
+    # 保存文件的函数
+    def save_file_periodically(self):
+        try:
+        # 初始化上次保存时间
+            last_save_time = time.time()
+            while True:
+                # 等待一秒钟
+                time.sleep(60)
+                # 检查是否到了保存时间点
+                current_time = time.time()
+                if current_time - last_save_time >= 120:
+                    self.tableToexcel(filepath='./测试用例（自动保存）.xlsx')
+        except:
+            logging.error(traceback.format_exc() + "\n")
+
+
+
+    def insertChapter(self):
+        self.win.setwin()
+        if self.win.newchapter.startswith('Level 1:'):
+            self.chapterList.append(self.win.newchapter)
+            self.chapterList=sorted(self.chapterList, key=str.lower)
+            self.datatotable()
+            # self.tableWidget.verticalScrollBar().setSliderPosition(0)
+        elif self.win.newchapter !='':
+            msg_box = QMessageBox(QMessageBox.Information, "提示", "请输入正确的章节格式!")
+            msg_box.exec_()
+
+    # def getELFAnalysis(self):
+    #     filter = "elf Files(*.elf);;out files (*.out)"
+    #     path = QFileDialog.getOpenFileName(self, "选择文件", '/', filter)
+    #     self.elfpath = path[0]
+    #     if self.elfpath:
+    #         # elfAnalysis = ELFAnalysis()
+    #         self.elfAnalysis.loadPath(self.elfpath)
+    #         # self.structDict = elfAnalysis.structDict
+    #         msg_box = QMessageBox(QMessageBox.Information, "标题", "导入成功!")
+    #         msg_box.exec_()
 
 
     def getTabelCellData(self, row, section):
@@ -924,7 +903,8 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 # print(datalist)
                 if datalist != []:
                     try:
-                        workbook = Workbook('./自动测试.xlsx')
+                        filename, _ = QFileDialog.getSaveFileName(self, "导出测试用例", "", "Excel Files (*.xlsx)")
+                        workbook = Workbook(filename)
                         sheet1 = workbook.add_worksheet('CAN')
                         sheet1.set_column('C:D',30)
                         sheet1.set_column('B:B',15)
@@ -1118,7 +1098,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
                 msg_box.exec_()
         except:
             logging.error(traceback.format_exc() + "\n")
-        # print(tabledata)
 
     def excelTotable(self):
         try:

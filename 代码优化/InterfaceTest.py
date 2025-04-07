@@ -34,7 +34,7 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
-        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 4)
+        self.gridLayout.addWidget(self.tableWidget, 0, 0, 1, 5)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setObjectName("pushButton")
         self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
@@ -48,6 +48,11 @@ class Ui_MainWindow(object):
         self.pushButton_clear = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_clear.setObjectName("pushButton_clear")
         self.gridLayout.addWidget(self.pushButton_clear, 1, 3, 1, 1)
+
+        # 导出到Excel按钮
+        self.pushButton_export = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_export.setObjectName("pushButton_export")
+        self.gridLayout.addWidget(self.pushButton_export, 1, 4, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -65,10 +70,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "测试用例编写工具"))
-        self.pushButton.setText(_translate("MainWindow", "导出文件"))
+        self.pushButton.setText(_translate("MainWindow", "导出自动测试文件"))
         self.pushButton_2.setText(_translate("MainWindow", "导入文件"))
         self.pushButton3.setText('添加行')
         self.pushButton_clear.setText('清空数据')  # 设置清空按钮的文本
+        self.pushButton_export.setText(_translate("MainWindow", "导出测试用例"))
 
 class InterfaceTest(QMainWindow,Ui_MainWindow):
     config = CanLinConfig()
@@ -95,6 +101,7 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         self.pushButton3.clicked.connect(lambda :self.addrow(0))
 
         self.pushButton_clear.clicked.connect(self.clear_table)
+        self.pushButton_export.clicked.connect(self.export_to_excel)
 
         self.elfAnalysis = ELFAnalysis()  # 实例变量
         self.hardwaredic = {}
@@ -108,14 +115,50 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         清空 tableWidget 的所有行和内容
         """
         try:
-            # 清空表格中的所有行
-            self.tableWidget.setRowCount(0)
-            # 清空接口列表
-            self.InterfaceList.clear()
-            self.settable()  # 重新设置表格头
-            QMessageBox.information(self, "提示", "数据已清空！")
+            response = QMessageBox.question(self, '确认', '确定清空数据吗？')
+            if response == QMessageBox.Yes:
+                # 清空表格中的所有行
+                self.tableWidget.setRowCount(0)
+                # 清空接口列表
+                self.InterfaceList.clear()
+                self.settable()  # 重新设置表格头
+                # QMessageBox.information(self, "提示", "数据已清空！")
+            else:
+                pass
         except Exception as e:
             logging.error(f"清空表格时发生错误: {traceback.format_exc()}")
+
+    def export_to_excel(self):
+        try:
+            # 打开文件保存对话框，让用户选择保存路径
+            filename, _ = QFileDialog.getSaveFileName(self, "导出测试用例", "", "Excel Files (*.xlsx)")
+            if not filename:
+                return  # 如果用户取消选择，直接返回
+
+            # 创建 Excel 工作簿和工作表
+            workbook = openpyxl.Workbook()
+            sheet = workbook.active
+            sheet.title = "导出数据"
+
+            # 写入表头
+            headers = ["接口类型", "接口名称", "信号描述", "信号归属模块", "map地址", "信号方向", "信号长度",
+                       "正向测试值", "关联信号", "关联属性"]
+            for col_num, header in enumerate(headers, 1):
+                sheet.cell(row=1, column=col_num, value=header)
+
+            # 写入表格数据
+            for row_num in range(self.tableWidget.rowCount()):
+                for col_num in range(self.tableWidget.columnCount()):
+                    item = self.tableWidget.item(row_num, col_num)
+                    if item is not None:
+                        sheet.cell(row=row_num + 2, column=col_num + 1, value=item.text())
+
+            # 保存文件
+            workbook.save(filename)
+            QMessageBox.information(self, "成功", f"数据已成功导出到 {filename}")
+        except Exception as e:
+            logging.error(f"导出到Excel时发生错误: {traceback.format_exc()}")
+            QMessageBox.critical(self, "错误", "导出失败，请查看日志！")
 
     #添加的复制粘贴模块
     def contextMenuEvent(self, event):
@@ -124,9 +167,9 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
             menu = QMenu(self)
             row = self.tableWidget.rowAt(event.y())
 
-        # 添加菜单项：插入步骤、插入备注
-            insert_row_action = menu.addAction('插入步骤')
-            note_row_action = menu.addAction('插入备注')
+        # # 添加菜单项：插入步骤、插入备注
+        #     insert_row_action = menu.addAction('插入步骤')
+        #     note_row_action = menu.addAction('插入备注')
 
         # 添加复制和粘贴功能
             copy_action = QAction("复制 (Ctrl+C)", self)
@@ -138,9 +181,9 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
             menu.addAction(copy_action)
             menu.addAction(paste_action)
 
-        # 绑定菜单项触发事件
-            insert_row_action.triggered.connect(lambda: self.addrow1(row + 1))
-            note_row_action.triggered.connect(lambda: self.addnote1(row + 1))
+        # # 绑定菜单项触发事件
+        #     insert_row_action.triggered.connect(lambda: self.addrow1(row + 1))
+        #     note_row_action.triggered.connect(lambda: self.addnote1(row + 1))
 
         # 显示菜单
             menu.exec_(QCursor.pos())
@@ -222,8 +265,15 @@ class InterfaceTest(QMainWindow,Ui_MainWindow):
         try:
             self.openfile = self.exceltoTable or os.getcwd()
             path = QFileDialog.getOpenFileName(self, "选择文件", '/', "xlsx Files(*.xlsx)")
+            sheet_name = '软件接口定义表'
+            if not path[0]:
+                QMessageBox.information(self, "温馨提示", "未选择文件！")
+                return
             if path[0]:
                 book = xlrd2.open_workbook(path[0])
+                if sheet_name not in book.sheet_names():
+                    QMessageBox.information(self, "温馨提示", "导入文件不正确！")
+                    return
                 sheet = book.sheet_by_name('软件接口定义表')
                 row = self.tableWidget.rowCount()
                 for i in range(1, sheet.nrows):

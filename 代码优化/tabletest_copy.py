@@ -90,7 +90,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "空调测试用例编写工具"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "测试用例编写工具"))
         self.pushButton.setText(_translate("MainWindow", "查看报文解析"))
         self.pushButton_2.setText(_translate("MainWindow", "添加步骤"))
         self.pushButton_3.setText(_translate("MainWindow", "清空"))
@@ -103,6 +103,6 @@ class Ui_MainWindow(object):
         self.action_xlsx2.setText(_translate("MainWindow", "导入map文件"))
         self.action_xlsx3.setText(_translate("MainWindow", "导入功能规范"))
         self.action_xlsx4.setText(_translate("MainWindow", "导出自动测试Excel"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "用例编写"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "通用测试用例编写"))
 
 
