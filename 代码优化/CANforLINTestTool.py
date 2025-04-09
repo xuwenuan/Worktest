@@ -112,6 +112,10 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
                 self.tableWidget.clearContents()  # 清空表格内容
                 self.tableWidget.setRowCount(0)  # 清空表格行数
                 self.settable()  # 重新设置表格头
+                # 清空外部缓存数据（如果有）
+                self.routingList.clear()
+                self.CANList.clear()
+
                 # QMessageBox.information(self, "提示", "数据已清空！")
             else:
                 pass
@@ -222,11 +226,6 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
             # 创建右键菜单
             menu = QMenu(self)
             row = self.tableWidget.rowAt(event.y())
-
-            # # 添加菜单项：插入步骤、插入备注
-            # insert_row_action = menu.addAction('插入步骤')
-            # note_row_action = menu.addAction('插入备注')
-
             # 添加复制和粘贴功能
             copy_action = QAction("复制 (Ctrl+C)", self)
             paste_action = QAction("粘贴 (Ctrl+V)", self)
@@ -237,22 +236,16 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
             menu.addAction(copy_action)
             menu.addAction(paste_action)
 
-            # # 绑定菜单项触发事件
-            # insert_row_action.triggered.connect(lambda: self.addrow1(row + 1))
-            # note_row_action.triggered.connect(lambda: self.addnote1(row + 1))
-
             # 显示菜单
             menu.exec_(QCursor.pos())
 
         except Exception as e:
             pass
-            # logging.error(f"Error in contextMenuEvent: {traceback.format_exc()}")
 
     def copy_selected_cells(self):
         """复制选中的单元格内容到剪贴板"""
         selected_ranges = self.tableWidget.selectedRanges()
         if not selected_ranges:
-            # logging.info("No cells selected for copying.")
             return
 
         clipboard_text = ""
@@ -278,7 +271,6 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
         # 将内容复制到剪贴板
         clipboard = QApplication.clipboard()
         clipboard.setText(clipboard_text.strip())
-        # logging.info(f"Copied text to clipboard: {clipboard_text.strip()}")
 
     def paste_cells(self):
         """将剪贴板内容粘贴到选中的单元格"""
@@ -320,12 +312,6 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
                 else:
                     item = QTableWidgetItem(cell_value)
                     self.tableWidget.setItem(target_row, target_col, item)
-                    # logging.info(f"Pasted text '{cell_value}' to QTableWidgetItem at ({target_row}, {target_col})")
-
-
-
-
-
 
     def readMesseage(self,path2):
         try:
@@ -348,24 +334,136 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
                     sheetbook2 = book2.sheet_by_name('硬件配置表')
                     self.LINList=sheetbook2.col_values(3)[3:]
                     self.CANList = sheetbook2.col_values(2)[3:]
-                    self.genautotable(path3)
-                    self.show_success_dialog('Success', '生成成功！')
+                    if self.genautotable(path3):
+                        self.show_success_dialog('Success', '生成成功！')
+                    else:
+                        self.show_success_dialog('FAIL', '生成失败，没有找到相关属性！')
         except:
             logging.error(traceback.format_exc() + "\n")
             self.show_success_dialog('FAIL', '生成失败，查看log！')
 
-    def genautotable(self,path3):
-        # self.routingList = self.routingList[1:]
-        dataList=[]
-        # print(self.routingList)
-        for item in self.routingList:
+    # def genautotable(self,path3):
+    #     # self.routingList = self.routingList[1:]
+    #     dataList=[]
+    #     # print(self.routingList)
+    #     for item in self.routingList:
+    #         preview = []
+    #         try:
+    #             data1 = '0'+str(self.LINList.index(item[0]))+'01'
+    #         except:
+    #             data1 = '0000'
+    #         if int(item[3]) == 2:
+    #             ID = '4'+item[2].replace('0x', '').replace('0X', '').zfill(3)
+    #         else:
+    #             ID = item[2].replace('0x', '').replace('0X', '').zfill(4)
+    #         if int(item[5]) < 20:
+    #             data3 = '0014'
+    #             cycle = '20'
+    #         else:
+    #             data3 = str(hex(int(item[5]))).upper()[2:].zfill(4)
+    #             cycle = item[5]
+    #         data2 = ID + str(hex(int(cycle) * 5)).upper()[2:].zfill(4)
+    #         data4 = str(hex((int(item[4])-1)*8)).upper()[2:].zfill(4)
+    #         data5 = str(hex(int(item[4])*8)).upper()[2:].zfill(4)
+    #         message1 = data1+data2+data3+data4+data5
+    #         Mac = ' '.join(message1[i:i + 2] for i in range(0, len(message1), 2)).upper()
+    #         if item[1] != '/':
+    #             name = item[0]+'_'+item[2]+"_"+item[1]
+    #         else:
+    #             name = item[0]+'_'+item[2]+"_"
+    #         data = ['event', name, Mac, cycle, '3', '0x700', '', '', '--', 'Motorola']
+    #         dataList.append(data)
+    #         preview.append(data)
+    #         seconditem = ['check', '单条测试用例处理状态', '0', cycle, '100', '0x710', '16', '8', '--', 'Motorola']
+    #         dataList.append(seconditem)
+    #         preview.append(seconditem)
+    #         s = 'FF'*(int(item[4])+1)
+    #         string = ' '.join(s[i:i + 2] for i in range(2, len(s), 2)).upper()
+    #         thirditem = ['event', name, string, cycle, '3', item[2], '', '', '--', 'Motorola']
+    #         anthirditem = ['event', name, string.replace('FF', '00'), cycle, '3', item[2], '', '', '--', 'Motorola']
+    #         dataList.append(thirditem)
+    #         preview.append(anthirditem)
+    #         if item[8] != '/':
+    #             name = item[7]+'CAN_'+item[9]+"_"+item[8]
+    #         else:
+    #             name = item[7]+'CAN_'+item[9]+"_"
+    #         try:
+    #             channel = '0' + str(self.CANList.index(item[7] + '_CAN')) + '00'
+    #         except:
+    #             channel = '0000'
+    #         if int(item[10]) ==1:
+    #             ID = '8'+item[9].replace('0x', '').replace('0X', '').zfill(3)
+    #         else:
+    #             ID = item[9].replace('0x', '').replace('0X', '').zfill(4)
+    #         if int(item[12]) < 20:
+    #             data3 = '0014'
+    #             cycle2 = '20'
+    #         else:
+    #             data3 = str(hex(int(item[12]))).upper()[2:].zfill(4)
+    #             cycle2 = item[12]
+    #
+    #         data4 = str(hex((int(item[11]) - 1) * 8)).upper()[2:].zfill(4)
+    #         data5 = str(hex(int(item[11]) * 8)).upper()[2:].zfill(4)
+    #         message2 = channel+ID+str(hex(int(cycle2)*5)).upper()[2:].zfill(4)+data3+data4+data5
+    #         Mac2 = ' '.join(message2[i:i + 2] for i in range(0, len(message2), 2)).upper()
+    #         forthitem = ['event', name, Mac2, cycle2, '3', '0x701', '', '', '--', 'Motorola']
+    #         dataList.append(forthitem)
+    #         preview.append(forthitem)
+    #         fifthitem = ['check', '单条测试用例处理状态', '1', int(cycle2)*5, '100', '0x710', '16', '8', '--', 'Motorola']
+    #         dataList.append(fifthitem)
+    #         preview.append(fifthitem)
+    #         t = 'FF' * (int(item[11])+1)
+    #         text = ' '.join(t[i:i + 2] for i in range(2, len(t), 2)).upper()
+    #         sixth = ['routercheck', name, text, cycle2, '100', item[9], '', '', '--', 'Motorola']
+    #         ansixth = ['routercheck', name, text.replace('FF', '00'), cycle2, '100', item[9], '', '', '--', 'Motorola']
+    #         dataList.append(sixth)
+    #         preview.append(ansixth)
+    #         dataList = dataList+preview
+    #         text=item[0]+' '+item[1]+' '+item[2]+'      '+item[7]+' '+item[8]+' '+item[9]
+    #         note = ['测试用例说明', text, '12', '', '', '', '', '', '', '']
+    #         dataList.append(note)
+    #     if not dataList:
+    #         return False
+    #     else:
+    #         headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start', 'Length',
+    #                         'flag', 'format']
+    #         workbook = Workbook(path3)
+    #         sheet1 = workbook.add_worksheet('CAN')
+    #         sheet1.set_column('C:D', 50)
+    #         sheet1.set_column('B:B', 15)
+    #         sheet1.set_column('E:K', 10)
+    #         font = workbook.add_format({'font_name': '等线', 'font_size': 12, 'align': 'center'})
+    #         for k in range(len(headnameList)):
+    #             sheet1.write(0, k, headnameList[k], font)
+    #         row = 1
+    #         for l in range(len(dataList)):
+    #             sheet1.write(row, 0, str(row), font)
+    #             for j in range(len(dataList[l])):
+    #                 sheet1.write(row, j+1, dataList[l][j], font)
+    #             row = row+1
+    #         workbook.close()
+    #         return True
+
+    def genautotable(self, path3):
+        dataList = []
+        # 遍历 tableWidget 中的每一行，动态生成 dataList
+        for row in range(self.tableWidget.rowCount()):
+            item = []
+            for col in range(self.tableWidget.columnCount() - 1):  # 排除最后一列的操作按钮
+                cell_item = self.tableWidget.item(row, col)
+                if cell_item is not None:
+                    item.append(cell_item.text())
+                else:
+                    item.append("")  # 如果单元格为空，使用空字符串作为默认值
+
+            # 以下逻辑保持不变，仅将数据来源从 routingList 替换为 tableWidget
             preview = []
             try:
-                data1 = '0'+str(self.LINList.index(item[0]))+'01'
-            except:
+                data1 = '0' + str(self.LINList.index(item[0])) + '01'
+            except ValueError:
                 data1 = '0000'
             if int(item[3]) == 2:
-                ID = '4'+item[2].replace('0x', '').replace('0X', '').zfill(3)
+                ID = '4' + item[2].replace('0x', '').replace('0X', '').zfill(3)
             else:
                 ID = item[2].replace('0x', '').replace('0X', '').zfill(4)
             if int(item[5]) < 20:
@@ -375,36 +473,39 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
                 data3 = str(hex(int(item[5]))).upper()[2:].zfill(4)
                 cycle = item[5]
             data2 = ID + str(hex(int(cycle) * 5)).upper()[2:].zfill(4)
-            data4 = str(hex((int(item[4])-1)*8)).upper()[2:].zfill(4)
-            data5 = str(hex(int(item[4])*8)).upper()[2:].zfill(4)
-            message1 = data1+data2+data3+data4+data5
+            data4 = str(hex((int(item[4]) - 1) * 8)).upper()[2:].zfill(4)
+            data5 = str(hex(int(item[4]) * 8)).upper()[2:].zfill(4)
+            message1 = data1 + data2 + data3 + data4 + data5
             Mac = ' '.join(message1[i:i + 2] for i in range(0, len(message1), 2)).upper()
             if item[1] != '/':
-                name = item[0]+'_'+item[2]+"_"+item[1]
+                name = item[0] + '_' + item[2] + "_" + item[1]
             else:
-                name = item[0]+'_'+item[2]+"_"
+                name = item[0] + '_' + item[2] + "_"
             data = ['event', name, Mac, cycle, '3', '0x700', '', '', '--', 'Motorola']
             dataList.append(data)
             preview.append(data)
+
             seconditem = ['check', '单条测试用例处理状态', '0', cycle, '100', '0x710', '16', '8', '--', 'Motorola']
             dataList.append(seconditem)
             preview.append(seconditem)
-            s = 'FF'*(int(item[4])+1)
+
+            s = 'FF' * (int(item[4]) + 1)
             string = ' '.join(s[i:i + 2] for i in range(2, len(s), 2)).upper()
             thirditem = ['event', name, string, cycle, '3', item[2], '', '', '--', 'Motorola']
             anthirditem = ['event', name, string.replace('FF', '00'), cycle, '3', item[2], '', '', '--', 'Motorola']
             dataList.append(thirditem)
             preview.append(anthirditem)
+
             if item[8] != '/':
-                name = item[7]+'CAN_'+item[9]+"_"+item[8]
+                name = item[7] + 'CAN_' + item[9] + "_" + item[8]
             else:
-                name = item[7]+'CAN_'+item[9]+"_"
+                name = item[7] + 'CAN_' + item[9] + "_"
             try:
                 channel = '0' + str(self.CANList.index(item[7] + '_CAN')) + '00'
-            except:
+            except ValueError:
                 channel = '0000'
-            if int(item[10]) ==1:
-                ID = '8'+item[9].replace('0x', '').replace('0X', '').zfill(3)
+            if int(item[10]) == 1:
+                ID = '8' + item[9].replace('0x', '').replace('0X', '').zfill(3)
             else:
                 ID = item[9].replace('0x', '').replace('0X', '').zfill(4)
             if int(item[12]) < 20:
@@ -416,25 +517,33 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
 
             data4 = str(hex((int(item[11]) - 1) * 8)).upper()[2:].zfill(4)
             data5 = str(hex(int(item[11]) * 8)).upper()[2:].zfill(4)
-            message2 = channel+ID+str(hex(int(cycle2)*5)).upper()[2:].zfill(4)+data3+data4+data5
+            message2 = channel + ID + str(hex(int(cycle2) * 5)).upper()[2:].zfill(4) + data3 + data4 + data5
             Mac2 = ' '.join(message2[i:i + 2] for i in range(0, len(message2), 2)).upper()
             forthitem = ['event', name, Mac2, cycle2, '3', '0x701', '', '', '--', 'Motorola']
             dataList.append(forthitem)
             preview.append(forthitem)
-            fifthitem = ['check', '单条测试用例处理状态', '1', int(cycle2)*5, '100', '0x710', '16', '8', '--', 'Motorola']
+
+            fifthitem = ['check', '单条测试用例处理状态', '1', int(cycle2) * 5, '100', '0x710', '16', '8', '--', 'Motorola']
             dataList.append(fifthitem)
             preview.append(fifthitem)
-            t = 'FF' * (int(item[11])+1)
+
+            t = 'FF' * (int(item[11]) + 1)
             text = ' '.join(t[i:i + 2] for i in range(2, len(t), 2)).upper()
             sixth = ['routercheck', name, text, cycle2, '100', item[9], '', '', '--', 'Motorola']
             ansixth = ['routercheck', name, text.replace('FF', '00'), cycle2, '100', item[9], '', '', '--', 'Motorola']
             dataList.append(sixth)
             preview.append(ansixth)
-            dataList = dataList+preview
-            text=item[0]+' '+item[1]+' '+item[2]+'      '+item[7]+' '+item[8]+' '+item[9]
+
+            dataList = dataList + preview
+            text = item[0] + ' ' + item[1] + ' ' + item[2] + '      ' + item[7] + ' ' + item[8] + ' ' + item[9]
             note = ['测试用例说明', text, '12', '', '', '', '', '', '', '']
             dataList.append(note)
-        if dataList!=[]:
+
+        has_dataList = bool(dataList)
+        if not has_dataList:
+            QMessageBox.warning(self, "警告", "没有可保存的数据！")
+            return False
+        else:
             headnameList = ['序号', '操作类型', '操作名称', '操作值', '间隔（ms）', 'Cycle（ms）', 'canID', 'Start', 'Length',
                             'flag', 'format']
             workbook = Workbook(path3)
@@ -449,10 +558,10 @@ class RoutingTest(QMainWindow,Ui_MainWindow):
             for l in range(len(dataList)):
                 sheet1.write(row, 0, str(row), font)
                 for j in range(len(dataList[l])):
-                    sheet1.write(row, j+1, dataList[l][j], font)
-                row = row+1
+                    sheet1.write(row, j + 1, dataList[l][j], font)
+                row = row + 1
             workbook.close()
-
+            return True
 
 
 if __name__ == '__main__':

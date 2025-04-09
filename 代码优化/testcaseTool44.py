@@ -1506,7 +1506,6 @@ class MainWindow(QMainWindow,Ui_MainWindow):
             QMessageBox.critical(self, "导入失败", f"文件 '{self.filename}' 导入失败！\n错误详情：{str(e)}")
 
 
-
     def clear_row(self):
         try:
             response = QMessageBox.question(self,'确认','确定清空数据吗？')
