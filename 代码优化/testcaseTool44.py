@@ -368,9 +368,11 @@ class MainWindow(QMainWindow,Ui_MainWindow):
         elif state == 2:
             QMessageBox.information(self, "重要提示！",
                                     "第一步导入协议文件，第二步导入map文件，第三步才是导入对应的测试文件。这样才能正确导出测试用例")
-        else:
+        elif state == 3:
+            QDesktopServices.openUrl(QUrl.fromLocalFile("./使用文档.pdf"))
             # 处理其他情况
-            pass
+        else:
+           pass
 
 
     # 保存文件的函数

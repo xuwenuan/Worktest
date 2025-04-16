@@ -4,7 +4,7 @@ import logging
 import os
 from collections import defaultdict
 from typing import Optional
-# from elftools.common.py3compat import (
+# from elftools.common.py3combat import (
 #     ifilter, byte2int, bytes2str, itervalues, str2bytes)
 # from elftools.dwarf.die import DIE
 # from elftools.elf.elffile import ELFFile
