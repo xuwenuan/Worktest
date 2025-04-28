@@ -77,8 +77,18 @@ class SignalRoutingTest:
         if row_count > 0:
             self.table.removeRow(row_count - 1)
 
-
     def add_row(self):
+        try:
+            current_row_count = self.table.rowCount()
+
+            self.table.insertRow(current_row_count)
+            deleteButton = QPushButton("删除")
+            deleteButton.clicked.connect(self.delete_clicked)  # 传递当前行号
+            self.table.setCellWidget(current_row_count, 22, deleteButton)
+        except Exception as e:
+            QMessageBox.critical(None, "错误", f"添加行时发生错误: {str(e)}")
+
+    def add_rows(self):
         try:
             # 弹出对话框让用户输入需要添加的行数
             row_count, ok = QInputDialog.getInt(

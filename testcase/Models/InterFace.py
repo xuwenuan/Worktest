@@ -32,7 +32,6 @@ class InterFace:
         self.interfacedic = {}
         self.InterfaceList = []
         self.elfAnalysis = elfAnalysis
-        print("初始化成功")
 
     def settable(self):
         headnameList = ['接口类型', '接口名称（代码中的全局变量）', '信号描述（用例显示名称）', '信号归属模块（ARXML名称）',
@@ -53,8 +52,18 @@ class InterFace:
         self.table.horizontalHeader().setSectionResizeMode(9, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(10, QHeaderView.ResizeToContents)
 
-
     def add_row(self):
+        try:
+            current_row_count = self.table.rowCount()
+
+            self.table.insertRow(current_row_count)
+            deleteButton = QPushButton("删除")
+            deleteButton.clicked.connect(self.delete_clicked)  # 传递当前行号
+            self.table.setCellWidget(current_row_count, 10, deleteButton)
+        except Exception as e:
+            QMessageBox.critical(None, "错误", f"添加行时发生错误: {str(e)}")
+
+    def add_rows(self):
         try:
             # 弹出对话框让用户输入需要添加的行数
             row_count, ok = QInputDialog.getInt(

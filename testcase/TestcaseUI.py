@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(814, 593)
         MainWindow.setStyleSheet("")
-        MainWindow.setWindowIcon(QIcon("sign.ico"))
+        # MainWindow.setWindowIcon(QIcon("./sign.ico"))
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -431,7 +431,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "自动化测试盒工具"))
-        self.pushButton_11.setText(_translate("MainWindow", "菜单栏"))
+        self.pushButton_11.setText(_translate("MainWindow", "预留位"))
         self.pushButton_10.setText(_translate("MainWindow", "配置页面"))
         self.pushButton.setText(_translate("MainWindow", "功能点检"))
         self.pushButton_2.setText(_translate("MainWindow", "接口测试"))

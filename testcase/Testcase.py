@@ -13,11 +13,12 @@ import os
 import threading
 import time
 import traceback
+import icons_rc
 
 import xlrd2
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QUrl
-from PyQt5.QtGui import QDesktopServices, QCursor, QBrush, QColor
+from PyQt5.QtGui import QDesktopServices, QCursor, QBrush, QColor, QIcon, QKeySequence
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog, QProgressDialog, QTableWidgetItem, \
     QComboBox, QAction, QMenu, qApp, QPushButton, QLineEdit, QWidget, QHBoxLayout
 
@@ -31,11 +32,46 @@ from Models.RoutingTest import RoutingTest
 from Models.SignaRoutingTest import SignalRoutingTest
 from TestcaseUI import Ui_MainWindow
 
+
+class UndoRedoStack:
+    def __init__(self, max_operations=6):
+        self.undo_stack = []
+        self.redo_stack = []
+        self.max_operations = max_operations
+
+    def push(self, operation):
+        self.undo_stack.append(operation)
+        self.redo_stack.clear()
+        if len(self.undo_stack) > self.max_operations:
+            self.undo_stack.pop(0)
+
+    def undo(self):
+        if self.can_undo():
+            operation = self.undo_stack.pop()
+            self.redo_stack.append(operation)
+            return self.undo_stack[-1]  # 不再额外检查 can_undo
+        return None
+
+    def redo(self):
+        if self.can_redo():
+            operation = self.redo_stack.pop()
+            self.undo_stack.append(operation)
+            return operation
+        return None
+
+    def can_undo(self):
+        return len(self.undo_stack) > 1
+
+    def can_redo(self):
+        return len(self.redo_stack) > 0
+
+
 class NewWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
         self.setWindowTitle("搜索")
+
 
         # 初始化搜索框和按钮
         self.lineEdit_1 = QLineEdit()
@@ -125,6 +161,23 @@ class UiMain(QMainWindow, Ui_MainWindow):
             4: 22  # 页面 4 合并 7 列
         }
 
+        self.undo_redo_stack = UndoRedoStack()
+        self.undo_redo_stack.push(self.get_table_data())  # 保存初始状态
+        self.record_enabled = True  # 控制是否允许记录修改
+        self.tableWidget_2.cellChanged.connect(self.record_operation)
+        self.tableWidget_3.cellChanged.connect(self.record_operation)
+        self.tableWidget_4.cellChanged.connect(self.record_operation)
+        self.tableWidget_5.cellChanged.connect(self.record_operation)
+
+        # 创建撤销快捷键 Ctrl+Z
+        undo_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Z"), self)
+        undo_shortcut.activated.connect(self.undo)
+
+        # 创建重做快捷键 Ctrl+Y
+        redo_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Y"), self)
+        redo_shortcut.activated.connect(self.redo)
+
+
         # 初始化 stackedWidget 页面
         self.total_pages = self.stackedWidget.count()
         self.initial_page_no = 0
@@ -161,7 +214,7 @@ class UiMain(QMainWindow, Ui_MainWindow):
         self.Interface = InterFace(self.tableWidget_2, self.elfAnalysis)
         self.Interface.settable()
         self.pushButton_17.clicked.connect(self.Interface.excel_toTable)
-        self.pushButton_18.clicked.connect(self.Interface.add_row)
+        self.pushButton_18.clicked.connect(self.Interface.add_rows)
         self.pushButton_19.clicked.connect(self.Interface.clear_table)
         self.pushButton_20.clicked.connect(self.Interface.export_to_excel)
         self.pushButton_21.clicked.connect(lambda :self.Interface.read_Messeage(self.filename, self.elfpath))
@@ -171,7 +224,7 @@ class UiMain(QMainWindow, Ui_MainWindow):
         self.RoutingTest = RoutingTest(self.tableWidget_3)
         self.RoutingTest.settable()
         self.pushButton_22.clicked.connect(self.RoutingTest.excel_toTable)
-        self.pushButton_23.clicked.connect(self.RoutingTest.add_row)
+        self.pushButton_23.clicked.connect(self.RoutingTest.add_rows)
         self.pushButton_24.clicked.connect(self.RoutingTest.clear_table)
         self.pushButton_25.clicked.connect(self.RoutingTest.export_to_excel)
         self.pushButton_26.clicked.connect(lambda :self.RoutingTest.readMesseage(self.filename))
@@ -181,7 +234,7 @@ class UiMain(QMainWindow, Ui_MainWindow):
         self.SignalRoutingTest = SignalRoutingTest(self.tableWidget_4)
         self.SignalRoutingTest.settable()
         self.pushButton_27.clicked.connect(self.SignalRoutingTest.excel_toTable)
-        self.pushButton_28.clicked.connect(self.SignalRoutingTest.add_row)
+        self.pushButton_28.clicked.connect(self.SignalRoutingTest.add_rows)
         self.pushButton_29.clicked.connect(self.SignalRoutingTest.clear_table)
         self.pushButton_30.clicked.connect(self.SignalRoutingTest.export_to_excel)
         self.pushButton_31.clicked.connect(lambda :self.SignalRoutingTest.readMesseage(self.filename, './信号路由自动测试.xlsx', './硬件输入的信号路由测试.xlsx'))
@@ -209,6 +262,92 @@ class UiMain(QMainWindow, Ui_MainWindow):
     def show_message2(self):
         QDesktopServices.openUrl(QUrl.fromLocalFile("./使用说明.pdf"))
 
+    def get_current_table_widget(self):
+        """根据当前页面索引返回对应的表格控件"""
+        current_index = self.stackedWidget.currentIndex()
+        if current_index == 1:
+            return self.tableWidget_5
+        elif current_index == 2:
+            return self.tableWidget_2
+        elif current_index == 3:
+            return self.tableWidget_3
+        elif current_index == 4:
+            return self.tableWidget_4
+        else:
+            return None
+
+
+    # 保存表格所有数据到列表
+    def get_table_data(self):
+        """获取当前表格的所有数据"""
+        table_widget = self.get_current_table_widget()
+        if not table_widget:
+            QMessageBox.warning(None, "警告", "当前页面没有对应的表格控件")
+            return []
+
+        data = []
+        for row in range(table_widget.rowCount()):
+            row_data = []
+            for col in range(table_widget.columnCount()):
+                item = table_widget.item(row, col)
+                row_data.append(item.text() if item else "")
+            data.append(row_data)
+        return data
+
+
+    # 从列表恢复到表格
+    def set_table_data(self, data):
+        """将数据恢复到当前表格"""
+        table_widget = self.get_current_table_widget()
+        if not table_widget:
+            QMessageBox.warning(None, "警告", "当前页面没有对应的表格控件")
+            return
+
+        table_widget.blockSignals(True)  # 暂停信号，防止死循环
+        table_widget.setRowCount(len(data))
+        table_widget.setColumnCount(len(data[0]) if data else 0)
+
+        for row_idx, row_data in enumerate(data):
+            for col_idx, cell_data in enumerate(row_data):
+                item = QtWidgets.QTableWidgetItem(cell_data)
+                table_widget.setItem(row_idx, col_idx, item)
+
+            # 重新绑定删除按钮（假设删除按钮在最后一列）
+            delete_button = QPushButton("删除")
+            delete_button.clicked.connect(lambda checked, row=row_idx: self.delete_row(row))
+            table_widget.setCellWidget(row_idx, len(row_data) - 1, delete_button)
+
+        table_widget.blockSignals(False)
+
+    def delete_row(self, row):
+        """删除指定行的操作"""
+        table_widget = self.get_current_table_widget()
+        table_widget.removeRow(row)
+        self.record_operation()  # 删除操作后记录状态
+
+    # 有任何修改就记录
+    def record_operation(self):
+        if not self.record_enabled:
+            return  # 如果当前不允许记录，直接返回
+
+        data_snapshot = self.get_table_data()
+        if not self.undo_redo_stack.undo_stack or data_snapshot != self.undo_redo_stack.undo_stack[-1]:
+            self.undo_redo_stack.push(data_snapshot)
+
+    # 执行撤销
+    def undo(self):
+        operation = self.undo_redo_stack.undo()
+        if operation is not None:
+            self.set_table_data(operation)
+
+    # 执行重做
+    def redo(self):
+        operation = self.undo_redo_stack.redo()
+        if operation is not None:
+            self.set_table_data(operation)
+
+
+
     def open_window(self):
         # 打开新窗口并将主窗口作为父窗口传递
         self.window = NewWindow(parent=self)
@@ -217,22 +356,7 @@ class UiMain(QMainWindow, Ui_MainWindow):
     #搜索函数
     def search_in_table(self, keyword, columns=None):
         try:
-            # 获取当前页面索引
-            current_index = self.stackedWidget.currentIndex()
-
-            # 根据页面索引选择对应的表格控件
-            if current_index == 1:
-                table_widget = self.tableWidget_5
-            elif current_index == 2:
-                table_widget = self.tableWidget_2
-            elif current_index == 3:
-                table_widget = self.tableWidget_3
-            elif current_index == 4:
-                table_widget = self.tableWidget_4
-            else:
-                QMessageBox.warning(None, "警告", "当前页面没有对应的表格控件")
-                return
-
+            table_widget = self.get_current_table_widget()
             # 检查表格控件是否有效
             if table_widget is None:
                 QMessageBox.warning(None, "警告", "表格控件未初始化")
@@ -276,10 +400,17 @@ class UiMain(QMainWindow, Ui_MainWindow):
         """
         default_brush = QBrush(Qt.transparent)  # 默认透明背景
         for row in range(table_widget.rowCount()):
+            # 获取第一列的内容，判断是否为备注行
+            first_item = table_widget.item(row, 0)
+            if first_item and "备注" in first_item.text():
+                continue  # 如果是备注行，则跳过
+
             for col in range(table_widget.columnCount()):
                 item = table_widget.item(row, col)
                 if item:
                     item.setBackground(default_brush)
+
+
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         cmenu = QMenu(self)  # 实例化Qmenu对象
@@ -298,19 +429,7 @@ class UiMain(QMainWindow, Ui_MainWindow):
 
     def copy_selected_cells(self):
         """复制选中的单元格内容到剪贴板"""
-        # 获取当前页面索引
-        current_index = self.stackedWidget.currentIndex()
-        # 根据页面索引选择对应的表格控件
-        if current_index == 1:
-            table_widget = self.tableWidget_5
-        elif current_index == 2:
-            table_widget = self.tableWidget_2
-        elif current_index == 3:
-            table_widget = self.tableWidget_3
-        elif current_index == 4:
-            table_widget = self.tableWidget_4
-        else:
-            return
+        table_widget = self.get_current_table_widget()
         # 获取选中的范围
         selected_ranges = table_widget.selectedRanges()
         clipboard_text = ""
@@ -432,7 +551,6 @@ class UiMain(QMainWindow, Ui_MainWindow):
             else:
                 QMessageBox.warning(None, "警告", "当前页面没有对应的表格控件")
                 return
-
             selected_ranges = table_widget.selectedRanges()
             if not selected_ranges:
                 QMessageBox.warning(None, "警告", "未选中任何单元格")
@@ -454,7 +572,9 @@ class UiMain(QMainWindow, Ui_MainWindow):
 
             # 设置灰色背景和空白项
             # brush = QBrush(QColor(230, 230, 230))
-            brush = QBrush(QColor(255, 255, 0))  # 设置背景颜色为黄色
+            brush = QBrush(QColor(119, 136, 153))  # 使用柔和的深灰色
+            # brush = QBrush(QColor(47, 79, 79))      # 或者更暗的深灰色
+            # brush = QBrush(QColor(255, 255, 0))  # 设置背景颜色为黄色
             for i in range(col_count):
                 item = QTableWidgetItem("" if i < col_count - 1 else None)
                 if item:
@@ -838,6 +958,7 @@ class LoadELFThread(QThread):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(':./sign.png'))
     win = UiMain()
     win.show()
     sys.exit(app.exec_())

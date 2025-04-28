@@ -585,6 +585,7 @@
   ('http.client', 'D:\\python398\\lib\\http\\client.py', 'PYMODULE'),
   ('http.cookiejar', 'D:\\python398\\lib\\http\\cookiejar.py', 'PYMODULE'),
   ('http.server', 'D:\\python398\\lib\\http\\server.py', 'PYMODULE'),
+  ('icons_rc', 'F:\\work\\testcase\\icons_rc.py', 'PYMODULE'),
   ('importlib', 'D:\\python398\\lib\\importlib\\__init__.py', 'PYMODULE'),
   ('importlib._bootstrap',
    'D:\\python398\\lib\\importlib\\_bootstrap.py',
