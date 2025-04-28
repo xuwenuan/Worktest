@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>814</width>
+    <height>593</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item alignment="Qt::AlignHCenter">
+     <widget class="QFrame" name="frame">
+      <property name="minimumSize">
+       <size>
+        <width>101</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="pushButton_11">
+         <property name="styleSheet">
+          <string notr="true">font: 10pt &quot;宋体&quot;;
+background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);</string>
+         </property>
+         <property name="text">
+          <string>菜单栏</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_10">
+         <property name="styleSheet">
+          <string notr="true">font: 10pt &quot;宋体&quot;;
+background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);</string>
+         </property>
+         <property name="text">
+          <string>配置页面</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;
+background-color: rgb(98, 114, 164);</string>
+         </property>
+         <property name="text">
+          <string>通用编写</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);
+font: 10pt &quot;宋体&quot;;</string>
+         </property>
+         <property name="text">
+          <string>接口测试</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);
+font: 10pt &quot;宋体&quot;;</string>
+         </property>
+         <property name="text">
+          <string>ID路由测试</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 10pt &quot;宋体&quot;;
+color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);</string>
+         </property>
+         <property name="text">
+          <string>信号路由测试</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="currentIndex">
+       <number>4</number>
+      </property>
+      <widget class="QWidget" name="page_5">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="7" column="2" colspan="3">
+         <widget class="QTextBrowser" name="textBrowser_2"/>
+        </item>
+        <item row="5" column="2" colspan="3">
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" rowspan="6" colspan="2">
+         <widget class="QTextBrowser" name="textBrowser"/>
+        </item>
+        <item row="2" column="2" colspan="3">
+         <widget class="QFrame" name="frame_3">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;波特率&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="pushButton_12">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋体&quot;;
+</string>
+             </property>
+             <property name="text">
+              <string>打开文件</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;打开串口&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;通道刷新&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="comboBox_2">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋体&quot;;
+</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QPushButton" name="pushButton_14">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋体&quot;;
+</string>
+             </property>
+             <property name="text">
+              <string>关闭</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;串口选择&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QComboBox" name="comboBox">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;Times New Roman&quot;;
+</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>1200</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>9600</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>14400</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;文件路径&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;关闭串口&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButton_13">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋体&quot;;
+</string>
+             </property>
+             <property name="text">
+              <string>打开</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QPushButton" name="pushButton_5">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;Times New Roman&quot;;
+background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>Refresh</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="3">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:700; color:#6272a4;&quot;&gt;CAN通信配置&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="4">
+         <widget class="QPushButton" name="pushButton_16">
+          <property name="styleSheet">
+           <string notr="true">font: 10pt &quot;宋体&quot;;
+background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>发送</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton_15">
+          <property name="styleSheet">
+           <string notr="true">font: 10pt &quot;宋体&quot;;
+background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>清除</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2" colspan="3">
+         <widget class="QComboBox" name="comboBox_3">
+          <property name="styleSheet">
+           <string notr="true">font: 10pt &quot;Times New Roman&quot;;</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>CAN</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CADFD</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="2">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;发送端&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#6272a4;&quot;&gt;接收端&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:700; color:#6272a4;&quot;&gt;通用测试用例编写&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_7">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pushButton_32">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导入测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_33">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋rgb(255, 255, 255)体&quot;;
+color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);</string>
+             </property>
+             <property name="text">
+              <string>添加行</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_34">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>清空数据</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButton_35">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_36">
+             <property name="styleSheet">
+              <string notr="true">font: 10pt &quot;宋体&quot;;
+color: rgb(255, 255, 255);
+background-color: rgb(98, 114, 164);</string>
+             </property>
+             <property name="text">
+              <string>导出自动化测试文件</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButton_6">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>查看报文解析</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_5"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_2">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:700; color:#6272a4;&quot;&gt;接口测试用例编写&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_4">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pushButton_17">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导入测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_18">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>添加行</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_19">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>清空数据</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButton_20">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_21">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出自动化测试文件</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_2"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_3">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:700; color:#6272a4;&quot;&gt;ID路由测试用例编写&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_5">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pushButton_22">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导入测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_23">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>添加行</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_24">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>清空数据</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButton_25">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_26">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出自动化测试文件</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_3"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_4">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:700; color:#6272a4;&quot;&gt;信号路由测试用例编写&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_6">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="pushButton_27">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导入测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_28">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>添加行</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_29">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>清空数据</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButton_30">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出测试用例</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="pushButton_31">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(98, 114, 164);
+color: rgb(255, 255, 255);
+font: 10pt &quot;宋体&quot;;</string>
+             </property>
+             <property name="text">
+              <string>导出自动化测试文件</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_4"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>814</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="action111"/>
+    <addaction name="action_ELF_OUT"/>
+    <addaction name="action_3"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>帮助</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="action_2"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>菜单栏</string>
+    </property>
+    <addaction name="action_4"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <action name="action111">
+   <property name="text">
+    <string>导入自动化测试盒协议文件</string>
+   </property>
+  </action>
+  <action name="action_ELF_OUT">
+   <property name="text">
+    <string>导入ELF/OUT文件</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>参考文档</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>使用说明</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>导入功能规范表格</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>搜索</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
